@@ -12,7 +12,9 @@ profile=$(resolve_profile "${1:-}")
 [[ $(uname -s) == Darwin ]] || die "mac bootstrap must run on macOS"
 
 confirm "bootstrap (mac): install packages and modify system settings?"
-sudo -v
+if ! sudo -n true 2>/dev/null; then
+  { [[ -t 0 && -t 2 ]] && sudo -v; } || die "need sudo access on macos"
+fi
 
 # brew: /opt/homebrew (apple silicon) or /usr/local (intel)
 brew_env() {

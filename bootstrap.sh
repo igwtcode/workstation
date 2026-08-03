@@ -103,6 +103,13 @@ if [[ $yes != 1 ]]; then
   [[ $reply == [yY]* ]] || die "aborted"
 fi
 
+# --- sudo: the brew installer and system settings need it; fail here rather
+# --- than halfway through an install --------------------------------------
+
+if [[ $os == mac ]] && ! sudo -n true 2>/dev/null; then
+  { [[ -t 0 && -t 2 ]] && sudo -v; } || die "need sudo access on macos"
+fi
+
 # --- prerequisites: git + mise only; everything else is os/<profile>/ ------
 
 prereqs_mac() {
