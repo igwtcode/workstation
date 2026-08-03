@@ -113,11 +113,14 @@ for rel in "${picked[@]}"; do
     fi
     log "saved $rel -> '$title'"
   else
-    if ! op_doc_get "$title" "$tmp/payload" 2>/dev/null; then
+    # ask first rather than `if ! op_doc_get`: its die() exits the whole task,
+    # so a not-yet-saved path would abort the run instead of being skipped
+    if [[ -z $(op_doc_id "$title") ]]; then
       warn "skip $rel — no 1Password document '$title'"
       failed=1
       continue
     fi
+    op_doc_get "$title" "$tmp/payload"
     if [[ $title == *.zip ]]; then
       require_cmd unzip
       mkdir -p "$(dirname "$abs")"
