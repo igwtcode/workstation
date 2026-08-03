@@ -13,8 +13,10 @@ source "$root/lib/op.sh"
 [[ ${usage_yes:-false} == true ]] && export WS_YES=1
 
 # Title follows the op:files convention (the ~-path, .zip for a directory),
-# so one naming scheme covers every document this repo touches.
-doc_title=${WS_OP_SSH_DOC:-~/.ssh.zip}
+# so one naming scheme covers every document this repo touches. The default
+# is quoted because bash tilde-expands the word in ${x:-word} — unquoted it
+# would look for a document literally titled '/Users/<name>/.ssh.zip'.
+doc_title=${WS_OP_SSH_DOC:-"~/.ssh.zip"}
 
 mode=${usage_mode:-}
 [[ -n $mode ]] || mode=$(printf 'load\nsave\n' | pick "op:ssh>")
