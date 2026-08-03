@@ -1,0 +1,19 @@
+# <repo-path> <target-path> — target starts with ~/ or is absolute; parents
+# are created. Directory links let apps write generated files back into the
+# repo; every such filename is gitignored.
+
+# shell (zshenv = env for every invocation, zshrc/bashrc = interactive)
+config/zsh/zshenv ~/.zshenv
+config/zsh/zshrc ~/.zshrc
+config/bash/bashrc ~/.bashrc
+config/shell ~/.config/shell
+
+# terminal tools on every profile
+config/tmux ~/.config/tmux
+config/nvim ~/.config/nvim
+config/vim/vimrc ~/.vimrc
+config/git ~/.config/git
+config/bat ~/.config/bat
+config/starship ~/.config/starship
+config/fzf ~/.config/fzf
+config/gum ~/.config/gum

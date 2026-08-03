@@ -1,0 +1,7 @@
+# Repo-dev tooling only — global tools come from paru/brew (see
+# CLAUDE.md § Settled decisions). Tasks live in .mise/tasks/.
+
+[tools]
+shellcheck = "latest"
+shfmt = "latest"
+usage = "latest"

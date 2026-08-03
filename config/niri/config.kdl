@@ -1,0 +1,307 @@
+// niri config — keybindings, default apps, workspace/monitor behavior and
+// autostart mirror config/desktop/README.md (parity with config/hypr).
+//
+// Machine-local pieces (output modes/positions) live in ./local.kdl —
+// gitignored, optional. ./noctalia.kdl is written by the noctalia shell.
+
+// Desktop shell — ws-session-shell (installed by os/arch/desktop) starts
+// noctalia or DMS from WS_SHELL, set by the login session entry.
+spawn-at-startup "ws-session-shell"
+spawn-at-startup "xwayland-satellite"
+spawn-at-startup "/usr/lib/xdg-desktop-portal-gnome"
+spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+spawn-at-startup "ghostty"
+
+prefer-no-csd
+screenshot-path "~/Pictures/Screenshots/ss-%Y-%m-%d-%H-%M-%S.png"
+
+input {
+  keyboard {
+    xkb {
+      layout "us,de"
+    }
+    repeat-rate 60
+    repeat-delay 240
+  }
+  touchpad {
+    tap
+    natural-scroll
+  }
+  warp-mouse-to-focus
+  focus-follows-mouse
+}
+
+gestures {
+  hot-corners {
+    off
+  }
+}
+
+blur {
+  off
+  passes 3
+  offset 4.2
+  noise 0.02
+  saturation 1.5
+}
+
+cursor {
+  xcursor-theme "capitaine-cursors"
+  xcursor-size 36
+
+  hide-when-typing
+  hide-after-inactive-ms 3000
+}
+
+layout {
+  gaps 0
+  background-color "transparent"
+  center-focused-column "never"
+  preset-column-widths {
+    proportion 0.33333
+    proportion 0.5
+    proportion 0.66667
+    proportion 1.0
+  }
+  default-column-width {
+    proportion 0.33333
+  }
+  focus-ring {
+    off
+    width 1.5
+  }
+  border {
+    off
+    width 1.5
+  }
+  struts {
+  }
+}
+
+window-rule {
+  geometry-corner-radius 0
+  clip-to-geometry true
+  draw-border-with-background false
+}
+
+overview {
+  workspace-shadow {
+    off
+  }
+}
+
+config-notification {
+  disable-failed
+}
+
+environment {
+  XDG_CURRENT_DESKTOP "niri"
+  QT_QPA_PLATFORMTHEME "qt6ct"
+}
+
+hotkey-overlay {
+  skip-at-startup
+}
+
+debug {
+  honor-xdg-activation-with-invalid-serial
+}
+
+binds {
+  // Applications
+  Mod+Return { spawn "ghostty"; }
+  Mod+Space { spawn-sh "ws-shell-ipc launcher"; }
+  Mod+B { spawn "firefox"; }
+  Mod+E { spawn "nautilus"; }
+  Mod+Q { close-window; }
+
+  // Desktop shell (ws-shell-ipc dispatches to the running shell)
+  Mod+S { spawn-sh "ws-shell-ipc control-center"; }
+  Mod+Comma { spawn-sh "ws-shell-ipc settings"; }
+  Mod+Ctrl+Q { spawn-sh "ws-shell-ipc lock"; }
+
+  // Media keys
+  XF86AudioRaiseVolume { spawn-sh "ws-shell-ipc volume-up"; }
+  XF86AudioLowerVolume { spawn-sh "ws-shell-ipc volume-down"; }
+  XF86AudioMute { spawn-sh "ws-shell-ipc volume-mute"; }
+  XF86AudioMicMute { spawn-sh "ws-shell-ipc mic-mute"; }
+  XF86AudioNext { spawn-sh "ws-shell-ipc media-next"; }
+  XF86AudioPrev { spawn-sh "ws-shell-ipc media-prev"; }
+  XF86AudioPlay { spawn-sh "ws-shell-ipc media-play-pause"; }
+  XF86MonBrightnessUp { spawn-sh "ws-shell-ipc brightness-up"; }
+  XF86MonBrightnessDown { spawn-sh "ws-shell-ipc brightness-down"; }
+
+  // Screenshots
+  Mod+Shift+1 { screenshot; }
+  Mod+Shift+2 { screenshot-screen; }
+  Mod+Shift+3 { screenshot-window; }
+
+  // Window focus
+  Mod+H     { focus-column-left; }
+  Mod+J     { focus-window-down; }
+  Mod+K     { focus-window-up; }
+  Mod+L     { focus-column-right; }
+  Mod+Left  { focus-column-left; }
+  Mod+Down  { focus-window-down; }
+  Mod+Up    { focus-window-up; }
+  Mod+Right { focus-column-right; }
+  Mod+Home  { focus-column-first; }
+  Mod+End   { focus-column-last; }
+
+  // Window move
+  Mod+Ctrl+H     { move-column-left; }
+  Mod+Ctrl+J     { move-window-down; }
+  Mod+Ctrl+K     { move-window-up; }
+  Mod+Ctrl+L     { move-column-right; }
+  Mod+Ctrl+Left  { move-column-left; }
+  Mod+Ctrl+Down  { move-window-down; }
+  Mod+Ctrl+Up    { move-window-up; }
+  Mod+Ctrl+Right { move-column-right; }
+  Mod+Ctrl+Home  { move-column-to-first; }
+  Mod+Ctrl+End   { move-column-to-last; }
+
+  // Focus monitor
+  Mod+Shift+Left  { focus-monitor-left; }
+  Mod+Shift+Down  { focus-monitor-down; }
+  Mod+Shift+Up    { focus-monitor-up; }
+  Mod+Shift+Right { focus-monitor-right; }
+
+  // Move window to monitor
+  Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+  Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+  Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+  Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+
+  // Workspaces
+  Mod+1 { focus-workspace 1; }
+  Mod+2 { focus-workspace 2; }
+  Mod+3 { focus-workspace 3; }
+  Mod+4 { focus-workspace 4; }
+  Mod+5 { focus-workspace 5; }
+  Mod+6 { focus-workspace 6; }
+  Mod+7 { focus-workspace 7; }
+  Mod+8 { focus-workspace 8; }
+  Mod+9 { focus-workspace 9; }
+  Mod+Tab { focus-workspace-previous; }
+
+  // Move window to workspace
+  Mod+Ctrl+1 { move-column-to-workspace 1; }
+  Mod+Ctrl+2 { move-column-to-workspace 2; }
+  Mod+Ctrl+3 { move-column-to-workspace 3; }
+  Mod+Ctrl+4 { move-column-to-workspace 4; }
+  Mod+Ctrl+5 { move-column-to-workspace 5; }
+  Mod+Ctrl+6 { move-column-to-workspace 6; }
+  Mod+Ctrl+7 { move-column-to-workspace 7; }
+  Mod+Ctrl+8 { move-column-to-workspace 8; }
+  Mod+Ctrl+9 { move-column-to-workspace 9; }
+
+  // Workspace navigation
+  Mod+Page_Up   { focus-workspace-up; }
+  Mod+Page_Down { focus-workspace-down; }
+  Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+  Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+
+  // Column width
+  Mod+R     { switch-preset-column-width; }
+  Mod+Minus { set-column-width "-10%"; }
+  Mod+Equal { set-column-width "+10%"; }
+
+  // Window height
+  Mod+Shift+Minus { set-window-height "-10%"; }
+  Mod+Shift+Equal { set-window-height "+10%"; }
+
+  // Fullscreen, maximize & layout
+  Mod+F       { maximize-column; }
+  Mod+Ctrl+F  { fullscreen-window; }
+  Mod+C       { center-column; }
+  Mod+Ctrl+C  { center-visible-columns; }
+  Mod+T       { toggle-window-floating; }
+  Mod+W       { toggle-column-tabbed-display; }
+  Mod+O       { toggle-overview; }
+
+  // Consume/expel
+  Mod+BracketLeft  { consume-window-into-column; }
+  Mod+BracketRight { expel-window-from-column; }
+
+  // System
+  Mod+Shift+Escape { show-hotkey-overlay; }
+  Mod+Shift+P      { power-off-monitors; }
+  Ctrl+Alt+Delete  { quit; }
+  Mod+Shift+Ctrl+T { toggle-debug-tint; }
+}
+
+window-rule {
+  match app-id="^gnome-control-center$"
+  match app-id="^pavucontrol$"
+  match app-id="^nm-connection-editor$"
+  default-column-width {
+    proportion 0.5
+  }
+  open-floating false
+}
+window-rule {
+  match app-id="^gnome-calculator$"
+  match app-id="^galculator$"
+  match app-id="^blueman-manager$"
+  open-floating true
+}
+window-rule {
+  match app-id="^org\\.gnome\\.Nautilus$"
+  match app-id="^xdg-desktop-portal$"
+  open-floating false
+}
+window-rule {
+  match app-id="^steam$" title="^notificationtoasts_\\d+_desktop$"
+  default-floating-position x=10 y=10 relative-to="bottom-right"
+  open-focused false
+}
+window-rule {
+  match app-id="^org\\.wezfurlong\\.wezterm$"
+  match app-id="Alacritty"
+  match app-id="zen"
+  match app-id="com.mitchellh.ghostty"
+  match app-id="kitty"
+  match app-id="dev.zed.Zed"
+  draw-border-with-background false
+  background-effect {
+    blur true
+  }
+}
+window-rule {
+  match app-id="firefox$" title="^Picture-in-Picture$"
+  match app-id="zoom"
+  open-floating true
+}
+window-rule {
+  match app-id=r#"^org\.telegram\.desktop$"#
+  match app-id=r#"^org\.keepassxc\.KeePassXC$"#
+  match app-id=r#"^org\.gnome\.World\.Secrets$"#
+  match app-id=r#"^1password$"#
+  block-out-from "screencast"
+}
+window-rule {
+  match app-id=r#"^org\.telegram\.desktop$"#
+  match app-id=r#"^org\.keepassxc\.KeePassXC$"#
+  match app-id=r#"^org\.gnome\.World\.Secrets$"#
+  match app-id=r#"^1password$"#
+  block-out-from "screen-capture"
+}
+
+layer-rule {
+  match namespace="^noctalia-wallpaper*"
+  place-within-backdrop true
+}
+layer-rule {
+  match namespace="^noctalia-notifications"
+  block-out-from "screencast"
+}
+layer-rule {
+  match namespace="^noctalia-notifications"
+  block-out-from "screen-capture"
+}
+
+// Machine-local outputs (modes, positions, scale) — gitignored
+include optional=true "./local.kdl"
+
+// Written by noctalia (shell theming) — gitignored
+include optional=true "./noctalia.kdl"

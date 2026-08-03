@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+# Thin entry — ~/.zshrc symlinks here (links/common.links). The shared core
+# and per-OS layers live next to this file's real location in the repo, so
+# resolving the symlink finds them without any hardcoded repo path.
+
+_ws_zdir="$(dirname "$(realpath ~/.zshrc)")"
+
+# OS layer first: it prepares PATH/env (brew shellenv, gnubin, clipboard
+# helper) that the core's tool inits depend on.
+case "$OSTYPE" in
+  darwin*) source "$_ws_zdir/mac.zsh" ;;
+  linux*) source "$_ws_zdir/linux.zsh" ;;
+esac
+
+source "$_ws_zdir/core.zsh"
+unset _ws_zdir
+
+# Machine-local, uncommitted extras
+[[ -f ~/.customrc.sh ]] && source ~/.customrc.sh

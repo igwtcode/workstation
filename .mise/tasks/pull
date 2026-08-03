@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+#MISE description="Fetch + fast-forward every git clone under the code root, with a summary"
+#USAGE arg "[dir]" help="Directory tree to scan (default: WS_CODE_ROOT — the active zone's code root)"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+
+require_cmd git fd
+
+scan=${usage_dir:-${WS_CODE_ROOT:-}}
+[[ -n $scan ]] ||
+  die "no directory given and WS_CODE_ROOT is unset — pass a path, or run from inside an identity zone"
+scan=${scan/#\~/$HOME}
+[[ -d $scan ]] || die "no such directory: $scan"
+
+mapfile -t gitdirs < <(fd --hidden --no-ignore --type d --max-depth 5 '^\.git$' "$scan" | sort)
+[[ ${#gitdirs[@]} -gt 0 ]] || die "no git repos found under ${scan/#$HOME/\~}"
+
+log "pulling ${#gitdirs[@]} repos under ${scan/#$HOME/\~} ..."
+
+report() { printf '%-12s %s\n' "$1" "$2"; }
+
+ok=0 updated=0 skipped=0 failed=0
+for gitdir in "${gitdirs[@]}"; do
+  repo=${gitdir%/}
+  repo=${repo%/.git}
+  rel=${repo#"$scan"/}
+  if [[ -n $(git -C "$repo" status --porcelain 2>/dev/null) ]]; then
+    report dirty "$rel"
+    skipped=$((skipped + 1))
+    continue
+  fi
+  if ! git -C "$repo" rev-parse --abbrev-ref '@{upstream}' >/dev/null 2>&1; then
+    report no-upstream "$rel"
+    skipped=$((skipped + 1))
+    continue
+  fi
+  before=$(git -C "$repo" rev-parse HEAD)
+  if git -C "$repo" pull --ff-only --quiet >/dev/null 2>&1; then
+    after=$(git -C "$repo" rev-parse HEAD)
+    if [[ $before == "$after" ]]; then
+      report up-to-date "$rel"
+      ok=$((ok + 1))
+    else
+      report updated "$rel"
+      updated=$((updated + 1))
+    fi
+  else
+    report failed "$rel"
+    failed=$((failed + 1))
+  fi
+done
+
+styled 2 "pull: $updated updated, $ok up-to-date, $skipped skipped (dirty/no-upstream), $failed failed"
+[[ $failed -eq 0 ]]

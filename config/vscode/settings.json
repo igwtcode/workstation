@@ -1,0 +1,84 @@
+{
+	"editor.cursorSmoothCaretAnimation": "on",
+	"biome.requireConfiguration": false,
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[terraform]": {
+		"editor.defaultFormatter": "hashicorp.terraform",
+		"editor.formatOnSave": true
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[shellscript]": {
+		"editor.defaultFormatter": "foxundermoon.shell-format"
+	},
+	"[dockerfile]": {
+		"editor.defaultFormatter": "ms-azuretools.vscode-docker"
+	},
+	"editor.formatOnSave": true,
+	"terminal.integrated.fontFamily": "GeistMono NF Medium",
+	"editor.fontFamily": "GeistMono NF Medium",
+	"editor.fontSize": 15,
+	"editor.lineHeight": 1.5,
+	"task": {
+		"path": "/usr/bin/go-task"
+	},
+	"aws.cloudformation.telemetry.enabled": false,
+	"editor.minimap.enabled": false,
+	"shellformat.useEditorConfig": true,
+	"window.zoomLevel": 2,
+	"workbench.startupEditor": "none",
+	"security.workspace.trust.untrustedFiles": "open",
+	"git.autoRepositoryDetection": "openEditors",
+	"git.repositoryScanMaxDepth": 1,
+	"aws.telemetry": false,
+	"yaml.customTags": [
+		"!And scalar",
+		"!If scalar",
+		"!Not",
+		"!Equals scalar",
+		"!Or scalar",
+		"!FindInMap scalar",
+		"!Base64",
+		"!Cidr",
+		"!Ref",
+		"!Sub",
+		"!GetAtt sequence",
+		"!GetAZs",
+		"!ImportValue sequence",
+		"!Select sequence",
+		"!Split sequence",
+		"!Join sequence",
+		"!And",
+		"!And sequence",
+		"!If",
+		"!If sequence",
+		"!Not sequence",
+		"!Equals",
+		"!Equals sequence",
+		"!Or",
+		"!Or sequence",
+		"!FindInMap",
+		"!FindInMap sequence",
+		"!Join",
+		"!Sub sequence",
+		"!GetAtt",
+		"!ImportValue",
+		"!Select",
+		"!Split"
+	],
+	"redhat.telemetry.enabled": false,
+	"workbench.iconTheme": "material-icon-theme",
+	"amazonQ.telemetry": false,
+	"database-client.autoSync": true,
+	"[yaml]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"workbench.colorTheme": "Catppuccin Mocha",
+	"terminal.integrated.defaultLocation": "editor"
+}

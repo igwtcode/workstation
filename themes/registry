@@ -1,0 +1,27 @@
+# Template registry — the single source of what `mise run theme` renders.
+# The /audit consistency check mirrors this against .gitignore: every
+# output path here must be gitignored (outputs are generated, never
+# committed).
+#
+# Format (one entry per line, paths relative to the repo root, no spaces):
+#   <template> <output> <post-hook>
+# post-hook is the rest of the line, run with `bash -c` from the repo root
+# after all templates render; `-` means none. Hook failures warn, not die
+# (reload targets may not be running).
+
+config/fzf/colors-template.sh config/fzf/colors.sh -
+config/gum/colors-template.sh config/gum/colors.sh -
+config/claude/colors-template.sh config/claude/colors.sh -
+config/tmux/colors-template.conf config/tmux/colors.conf tmux source-file ~/.config/tmux/tmux.conf
+config/herdr/config-template.toml config/herdr/config.toml herdr server reload-config
+config/nvim/lua/colors-template.lua config/nvim/lua/colors.lua pkill -USR1 -x nvim || true
+config/starship/config-template.toml config/starship/config.toml -
+config/lazygit/config-template.yml config/lazygit/config.yml -
+config/lazydocker/config-template.yml config/lazydocker/config.yml -
+config/git/config-template config/git/config -
+config/bat/themes/colors-template.tmTheme config/bat/themes/colors.tmTheme bat cache --build
+config/k9s/skins/colors-template.yaml config/k9s/skins/colors.yaml -
+config/superfile/theme/colors-template.toml config/superfile/theme/colors.toml -
+config/alacritty/themes/colors-template.toml config/alacritty/themes/colors.toml -
+config/ghostty/themes/colors-template config/ghostty/themes/colors -
+config/kitty/themes/colors-template.conf config/kitty/themes/colors.conf pkill -USR1 -x kitty || true

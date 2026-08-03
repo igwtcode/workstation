@@ -1,0 +1,44 @@
+# lazydocker config for the active theme — rendered by `mise run theme`
+# into config.yml (the lazydocker alias sets CONFIG_DIR); edit this
+# template only.
+# NOTE: no lazydocker curly-brace placeholder options may appear here
+# (commandTemplates, oS.openCommand, …) — the theme renderer treats every
+# double-curly token as a palette token and dies on unknown ones. The
+# defaults for those options are fine; only look & feel is configured here.
+# yaml-language-server: $schema=https://json.schemastore.org/lazydocker.json
+gui:
+  scrollHeight: 2
+  language: en
+  border: rounded # one of 'rounded' | 'single' | 'double' | 'hidden'
+  theme:
+    activeBorderColor:
+      - "{{accent}}"
+      - bold
+    inactiveBorderColor:
+      - "{{fg_dim}}"
+    selectedLineBgColor:
+      - "{{bg_alt}}"
+    optionsTextColor:
+      - "{{color4}}"
+  returnImmediately: false
+  wrapMainPanel: true
+  sidePanelWidth: 0.3
+  showBottomLine: true
+  expandFocusedSidePanel: false
+  screenMode: "normal" # one of 'normal' | 'half' | 'fullscreen'
+  # container status/health display: "long", "short" or "icon"
+  containerStatusHealthStyle: short
+logs:
+  timestamps: false
+  since: "60m" # set to '' to show all logs
+  tail: "" # set to 200 to show last 200 lines of logs
+stats:
+  graphs:
+    # graph colors take ANSI color names only, so they follow the terminal
+    # palette rather than a theme token
+    - caption: CPU (%)
+      statPath: DerivedStats.CPUPercentage
+      color: blue
+    - caption: Memory (%)
+      statPath: DerivedStats.MemoryPercentage
+      color: green

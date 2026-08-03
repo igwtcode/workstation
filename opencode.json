@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "audit-shell": {
+      "description": "Shell script quality, safety, and portability auditor for this repo. Read-only - reports findings, never edits. Use for a full-repo shell audit or scoped to given paths.",
+      "mode": "subagent",
+      "permission": { "edit": "deny" },
+      "prompt": "{file:.claude/agents/audit-shell.md}"
+    },
+    "audit-consistency": {
+      "description": "Cross-layer consistency auditor - manifest vs configs, templates vs palettes, registries vs gitignore, scripts vs package lists. Read-only - reports findings, never edits.",
+      "mode": "subagent",
+      "permission": { "edit": "deny" },
+      "prompt": "{file:.claude/agents/audit-consistency.md}"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# SEED for ~/work/mise.toml — copied there once by `mise run identity`, then
+# owned by the machine. Committed, so nothing private goes here; secrets go
+# in the copy.
+
+[env]
+WS_ZONE = "work"
+WS_CODE_ROOT = "{{env.HOME}}/work/code"
+GH_CONFIG_DIR = "{{env.HOME}}/.config/gh-work"
+CLAUDE_CONFIG_DIR = "{{env.HOME}}/.config/claude-work"
+AWS_CONFIG_FILE = "{{env.HOME}}/.aws/work-config"
+AWS_SHARED_CREDENTIALS_FILE = "{{env.HOME}}/.aws/work-credentials"
+KUBECONFIG = "{{env.HOME}}/.kube/work-config"

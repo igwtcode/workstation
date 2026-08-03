@@ -1,0 +1,36 @@
+# catppuccin light (latte) — colors from the canonical palette and the
+# official kitty port (ANSI mapping, selection, cursor taken verbatim):
+# https://github.com/catppuccin/palette/blob/main/palette.json
+# https://github.com/catppuccin/kitty/blob/main/themes/latte.conf
+# bg_alt = mantle; fg_dim = overlay2; border = overlay0; accent = mauve;
+# selection/cursor = rosewater (the kitty port's choice)
+
+name = "catppuccin-light"
+mode = "light"
+
+bg = "#eff1f5"
+bg_alt = "#e6e9ef"
+fg = "#4c4f69"
+fg_dim = "#7c7f93"
+accent = "#8839ef"
+selection_bg = "#dc8a78"
+selection_fg = "#eff1f5"
+cursor = "#dc8a78"
+border = "#9ca0b0"
+
+color0 = "#5c5f77"
+color1 = "#d20f39"
+color2 = "#40a02b"
+color3 = "#df8e1d"
+color4 = "#1e66f5"
+color5 = "#ea76cb"
+color6 = "#179299"
+color7 = "#acb0be"
+color8 = "#6c6f85"
+color9 = "#d20f39"
+color10 = "#40a02b"
+color11 = "#df8e1d"
+color12 = "#1e66f5"
+color13 = "#ea76cb"
+color14 = "#179299"
+color15 = "#bcc0cc"

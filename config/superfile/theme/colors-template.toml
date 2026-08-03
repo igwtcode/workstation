@@ -1,0 +1,60 @@
+# superfile theme for the active theme — rendered by `mise run theme` into
+# theme/colors.toml (config.toml sets theme = "colors"); edit this template
+# only. Code previews use bat (code_previewer = "bat"), so no chroma theme.
+code_syntax_highlight = ""
+
+#-- Full Screen
+full_screen_fg = "{{fg}}"
+full_screen_bg = "{{bg}}"
+
+#-- Gradient
+gradient_color = [
+  "{{accent}}",
+  "{{color3}}",
+]
+
+#-- File Panel
+file_panel_fg = "{{fg}}"
+file_panel_bg = "{{bg}}"
+file_panel_border = "{{border}}"
+file_panel_border_active = "{{accent}}"
+file_panel_top_directory_icon = "{{color4}}"
+file_panel_top_path = "{{accent}}"
+file_panel_item_selected_fg = "{{selection_fg}}"
+file_panel_item_selected_bg = "{{selection_bg}}"
+
+#-- Footer
+footer_fg = "{{fg}}"
+footer_bg = "{{bg}}"
+footer_border = "{{border}}"
+footer_border_active = "{{color4}}"
+
+#-- Sidebar
+sidebar_fg = "{{fg}}"
+sidebar_bg = "{{bg}}"
+sidebar_title = "{{color3}}"
+sidebar_border = "{{bg}}"
+sidebar_border_active = "{{accent}}"
+sidebar_item_selected_fg = "{{selection_fg}}"
+sidebar_item_selected_bg = "{{selection_bg}}"
+sidebar_divider = "{{border}}"
+
+#-- Modals
+modal_fg = "{{fg}}"
+modal_bg = "{{bg}}"
+modal_border_active = "{{border}}"
+modal_cancel_fg = "{{bg}}"
+modal_cancel_bg = "{{color1}}"
+modal_confirm_fg = "{{bg}}"
+modal_confirm_bg = "{{color2}}"
+
+#-- Help Menu
+help_menu_hotkey = "{{color4}}"
+help_menu_title = "{{color3}}"
+
+#-- Special
+cursor = "{{cursor}}"
+correct = "{{color2}}"
+error = "{{color9}}"
+hint = "{{color6}}"
+cancel = "{{color9}}"

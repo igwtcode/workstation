@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Hyprland · noctalia
+Comment=Hyprland compositor with the noctalia shell
+Exec=env WS_SHELL=noctalia Hyprland
+Type=Application
+DesktopNames=Hyprland

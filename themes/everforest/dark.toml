@@ -1,0 +1,35 @@
+# everforest dark (medium contrast, the upstream default) — palette:
+# https://github.com/sainnhe/everforest/blob/master/palette.md
+# ANSI mapping from the colorscheme's own terminal colors
+# (colors/everforest.vim: 0/8=bg3, 7/15=fg, bright == normal).
+# selection_bg = bg_visual; border = bg4 (window separators); accent = green
+
+name = "everforest-dark"
+mode = "dark"
+
+bg = "#2d353b"
+bg_alt = "#343f44"
+fg = "#d3c6aa"
+fg_dim = "#859289"
+accent = "#a7c080"
+selection_bg = "#543a48"
+selection_fg = "#d3c6aa"
+cursor = "#d3c6aa"
+border = "#4f585e"
+
+color0 = "#475258"
+color1 = "#e67e80"
+color2 = "#a7c080"
+color3 = "#dbbc7f"
+color4 = "#7fbbb3"
+color5 = "#d699b6"
+color6 = "#83c092"
+color7 = "#d3c6aa"
+color8 = "#475258"
+color9 = "#e67e80"
+color10 = "#a7c080"
+color11 = "#dbbc7f"
+color12 = "#7fbbb3"
+color13 = "#d699b6"
+color14 = "#83c092"
+color15 = "#d3c6aa"

@@ -1,0 +1,29 @@
+# mac layer, applied after common. Format: see common.links.
+
+# terminal emulators
+config/alacritty/mac.toml ~/.config/alacritty/alacritty.toml
+config/alacritty/shared.toml ~/.config/alacritty/shared.toml
+config/alacritty/themes ~/.config/alacritty/themes
+config/ghostty/config ~/.config/ghostty/config
+config/ghostty/mac.conf ~/.config/ghostty/os.conf
+config/ghostty/themes ~/.config/ghostty/themes
+config/kitty ~/.config/kitty
+
+# GUI apps
+config/zed ~/.config/zed
+config/btop ~/.config/btop
+config/vscode/settings.json ~/Library/Application Support/Code/User/settings.json
+config/vscode/keybindings.json ~/Library/Application Support/Code/User/keybindings.json
+
+# gh: settings only — hosts.yml (account + token) stays out of the repo
+config/gh/config.yml ~/.config/gh-work/config.yml
+config/gh/config.yml ~/.config/gh-personal/config.yml
+
+# CLI tools beyond the server profile
+config/herdr ~/.config/herdr
+config/claude ~/.config/ws/claude
+config/lazygit ~/.config/lazygit
+config/lazydocker ~/.config/lazydocker
+config/k9s ~/.config/k9s
+config/superfile ~/.config/superfile
+config/terraform/terraformrc ~/.terraformrc

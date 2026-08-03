@@ -1,0 +1,58 @@
+# alacritty colors for the active theme — rendered by `mise run theme`
+# into colors.toml; edit this template only.
+
+[colors.primary]
+background = '{{bg}}'
+foreground = '{{fg}}'
+
+[colors.cursor]
+text = '{{bg}}'
+cursor = '{{cursor}}'
+
+[colors.vi_mode_cursor]
+text = '{{bg}}'
+cursor = '{{accent}}'
+
+[colors.search.matches]
+foreground = '{{bg}}'
+background = '{{color3}}'
+
+[colors.search.focused_match]
+foreground = '{{bg}}'
+background = '{{accent}}'
+
+[colors.footer_bar]
+foreground = '{{fg}}'
+background = '{{bg_alt}}'
+
+[colors.hints.start]
+foreground = '{{bg}}'
+background = '{{color3}}'
+
+[colors.hints.end]
+foreground = '{{bg}}'
+background = '{{fg_dim}}'
+
+[colors.selection]
+text = '{{selection_fg}}'
+background = '{{selection_bg}}'
+
+[colors.normal]
+black = '{{color0}}'
+red = '{{color1}}'
+green = '{{color2}}'
+yellow = '{{color3}}'
+blue = '{{color4}}'
+magenta = '{{color5}}'
+cyan = '{{color6}}'
+white = '{{color7}}'
+
+[colors.bright]
+black = '{{color8}}'
+red = '{{color9}}'
+green = '{{color10}}'
+yellow = '{{color11}}'
+blue = '{{color12}}'
+magenta = '{{color13}}'
+cyan = '{{color14}}'
+white = '{{color15}}'

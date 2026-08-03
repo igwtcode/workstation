@@ -1,0 +1,49 @@
+# vim: ft=conf
+# Shared ghostty config — linked to ~/.config/ghostty/config. OS-specific
+# overrides live in linux.conf/mac.conf; the manifest links the right one
+# to ~/.config/ghostty/os.conf, pulled in at the end (config-file includes
+# are processed last and override earlier keys — verified against current
+# ghostty docs).
+
+theme = colors
+
+# Font
+font-family = "GeistMono Nerd Font"
+font-feature = -calt
+font-feature = -liga
+font-feature = -dlig
+font-synthetic-style = true
+
+# Window
+window-save-state = always
+window-padding-color = background
+
+# Cursor
+cursor-style = block
+cursor-style-blink = false
+
+# Scrollback
+scrollback-limit = 99999
+
+# Terminal behavior
+mouse-hide-while-typing = true
+copy-on-select = false
+confirm-close-surface = false
+app-notifications = no-clipboard-copy,no-config-reload
+
+# Keybinds
+keybind = ctrl+plus=increase_font_size:1
+keybind = ctrl+minus=decrease_font_size:1
+keybind = ctrl+zero=reset_font_size
+keybind = ctrl+shift+r=reload_config
+keybind = shift+enter=text:\n
+
+# Shell integration
+shell-integration = detect
+shell-integration-features = cursor,sudo,title,no-cursor
+
+term = xterm-256color
+
+# Per-OS overrides (linked per profile by the manifest; optional so a
+# missing link doesn't break startup)
+config-file = ?~/.config/ghostty/os.conf

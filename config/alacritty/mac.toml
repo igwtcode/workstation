@@ -1,0 +1,16 @@
+# Mac entry — linked to ~/.config/alacritty/alacritty.toml by
+# links/mac.links; imports shared.toml and overrides the mac-specifics.
+
+[general]
+import = ["~/.config/alacritty/shared.toml"]
+
+[window]
+padding = { x = 11, y = 11 }
+decorations = "buttonless"
+opacity = 0.71
+blur = true
+startup_mode = "SimpleFullscreen"
+option_as_alt = "Both"
+
+[font]
+size = 18

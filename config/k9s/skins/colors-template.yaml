@@ -1,0 +1,103 @@
+# k9s skin for the active theme — rendered by `mise run theme` into
+# skins/colors.yaml (config.yaml sets ui.skin: colors); edit this template
+# only.
+k9s:
+  body:
+    fgColor: "{{fg}}"
+    bgColor: default
+    logoColor: "{{accent}}"
+  prompt:
+    fgColor: "{{fg}}"
+    bgColor: default
+    suggestColor: "{{accent}}"
+  help:
+    fgColor: "{{fg}}"
+    bgColor: default
+    sectionColor: "{{color4}}"
+    keyColor: "{{accent}}"
+    numKeyColor: "{{color1}}"
+  frame:
+    title:
+      fgColor: "{{accent}}"
+      bgColor: default
+      highlightColor: "{{color3}}"
+      counterColor: "{{color5}}"
+      filterColor: "{{color4}}"
+    border:
+      fgColor: "{{border}}"
+      focusColor: "{{accent}}"
+    menu:
+      fgColor: "{{fg}}"
+      keyColor: "{{accent}}"
+      numKeyColor: "{{color1}}"
+    crumbs:
+      fgColor: "{{fg}}"
+      bgColor: default
+      activeColor: "{{color4}}"
+    status:
+      newColor: "{{color2}}"
+      modifyColor: "{{color3}}"
+      addColor: "{{color2}}"
+      pendingColor: "{{color5}}"
+      errorColor: "{{color1}}"
+      highlightColor: "{{accent}}"
+      killColor: "{{color9}}"
+      completedColor: "{{fg_dim}}"
+  info:
+    fgColor: "{{color5}}"
+    sectionColor: "{{fg}}"
+  views:
+    table:
+      fgColor: "{{fg}}"
+      bgColor: default
+      cursorFgColor: "{{selection_fg}}"
+      cursorBgColor: "{{selection_bg}}"
+      markColor: "{{color3}}"
+      header:
+        fgColor: "{{color5}}"
+        bgColor: default
+        sorterColor: "{{color4}}"
+    xray:
+      fgColor: "{{fg}}"
+      bgColor: default
+      cursorColor: "{{selection_bg}}"
+      cursorTextColor: "{{selection_fg}}"
+      graphicColor: "{{accent}}"
+    charts:
+      bgColor: default
+      chartBgColor: default
+      dialBgColor: default
+      defaultDialColors:
+        - "{{color4}}"
+        - "{{color1}}"
+      defaultChartColors:
+        - "{{color4}}"
+        - "{{color1}}"
+      resourceColors:
+        cpu:
+          - "{{color3}}"
+          - "{{accent}}"
+        mem:
+          - "{{color5}}"
+          - "{{color4}}"
+    yaml:
+      keyColor: "{{accent}}"
+      valueColor: "{{fg}}"
+      colonColor: "{{border}}"
+    logs:
+      fgColor: "{{fg}}"
+      bgColor: default
+      indicator:
+        fgColor: "{{accent}}"
+        bgColor: default
+        toggleOnColor: "{{color2}}"
+        toggleOffColor: "{{fg_dim}}"
+  dialog:
+    fgColor: "{{color5}}"
+    bgColor: default
+    buttonFgColor: "{{fg}}"
+    buttonBgColor: default
+    buttonFocusFgColor: "{{bg}}"
+    buttonFocusBgColor: "{{accent}}"
+    labelFgColor: "{{fg_dim}}"
+    fieldFgColor: "{{fg}}"

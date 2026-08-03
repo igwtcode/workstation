@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+# ~/.zshenv symlinks here (links/common.links).
+#
+# zsh sources this for EVERY invocation — interactive, non-interactive,
+# scripts, `ssh host 'cmd'` — and always before .zprofile/.zshrc. That makes
+# it the correct home for environment variables that tools read at startup;
+# .zshrc only covers interactive shells and would leave scripts and remote
+# commands with the platform defaults.
+#
+# Environment only. No PATH edits (macOS runs path_helper from /etc/zprofile
+# *after* this file for login shells and would reorder them), no output, no
+# anything that assumes a terminal.
+
+_ws_zdir="$(dirname "$(realpath ~/.zshenv)")"
+
+# shellcheck source=config/shell/xdg.sh
+source "$_ws_zdir/../shell/xdg.sh"
+
+unset _ws_zdir

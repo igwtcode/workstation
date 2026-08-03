@@ -1,0 +1,35 @@
+# everforest light (medium contrast, the upstream default) — palette:
+# https://github.com/sainnhe/everforest/blob/master/palette.md
+# ANSI mapping from the colorscheme's own terminal colors
+# (colors/everforest.vim: 0/8=fg, 7/15=bg3, bright == normal).
+# selection_bg = bg_visual; border = bg4 (window separators); accent = green
+
+name = "everforest-light"
+mode = "light"
+
+bg = "#fdf6e3"
+bg_alt = "#f4f0d9"
+fg = "#5c6a72"
+fg_dim = "#939f91"
+accent = "#8da101"
+selection_bg = "#eaedc8"
+selection_fg = "#5c6a72"
+cursor = "#5c6a72"
+border = "#e0dcc7"
+
+color0 = "#5c6a72"
+color1 = "#f85552"
+color2 = "#8da101"
+color3 = "#dfa000"
+color4 = "#3a94c5"
+color5 = "#df69ba"
+color6 = "#35a77c"
+color7 = "#e6e2cc"
+color8 = "#5c6a72"
+color9 = "#f85552"
+color10 = "#8da101"
+color11 = "#dfa000"
+color12 = "#3a94c5"
+color13 = "#df69ba"
+color14 = "#35a77c"
+color15 = "#e6e2cc"

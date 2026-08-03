@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+#MISE description="Bootstrap this machine (machine-mutating): packages, OS setup, symlinks, identity, theme"
+#USAGE flag "-p --profile <profile>" help="Profile override (default: detected)" {
+#USAGE   choices "mac" "arch" "server"
+#USAGE }
+#USAGE flag "-y --yes" help="Skip confirmations"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+# shellcheck source=lib/theme.sh
+source "$root/lib/theme.sh"
+
+[[ ${usage_yes:-false} == true ]] && export WS_YES=1
+
+profile=$(resolve_profile "${usage_profile:-}")
+export WS_PROFILE=$profile
+
+case $profile in
+  arch) "$root/os/arch/bootstrap.sh" "$profile" ;;
+  mac) "$root/os/mac/bootstrap.sh" "$profile" ;;
+  server) "$root/os/server/install.sh" "$profile" ;;
+esac
+
+mise run sync --profile "$profile"
+
+have_zones() { [[ -n ${WS_ZONES:-} ]] || grep -qs WS_ZONES "$root/mise.local.toml"; }
+
+# Everything below needs the private layer, which needs a signed-in 1Password.
+# Child `mise run` calls re-resolve the config chain, so they see the
+# mise.local.toml that secrets:pull writes; this shell cannot.
+if [[ $profile != server ]]; then
+  if ! have_zones && [[ -t 0 && -t 2 && ${WS_YES:-0} != 1 ]]; then
+    styled 4 "==> 1Password: sign in and enable Settings -> Developer -> CLI integration"
+    if confirm "1Password ready?"; then
+      if mise run secrets:pull; then
+        mise trust >/dev/null
+      else
+        warn "secrets:pull failed"
+      fi
+    fi
+  fi
+
+  if have_zones; then
+    mise run identity || warn "identity incomplete — re-run 'mise run identity'"
+    mise run op:ssh load || warn "op:ssh load skipped"
+    mise run op:files load --all || warn "op:files load skipped"
+  else
+    warn "no WS_ZONES yet — identity and restores skipped"
+  fi
+fi
+
+theme=$(theme_current)
+mise run theme "${theme:-gruvbox-dark}"
+
+styled 4 "remaining manual steps: see the runbook note in 1Password"
+styled 2 "bootstrap: done"

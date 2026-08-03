@@ -1,0 +1,5 @@
+# Linux entry — linked to ~/.config/alacritty/alacritty.toml by
+# links/linux.links; everything lives in shared.toml.
+
+[general]
+import = ["~/.config/alacritty/shared.toml"]

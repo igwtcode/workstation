@@ -1,0 +1,37 @@
+# github dark (GitHub Dark Default) — colors from Primer primitives 7.10.0
+# as consumed (with documented overrides) by the official VS Code theme:
+# https://unpkg.com/@primer/primitives@7.10.0/dist/json/colors/dark.json
+# https://github.com/primer/github-vscode-theme/blob/main/src/colors.js
+# fg/fg_dim/accent use the theme's shipped overrides; cursor = accent
+# (editorCursor); selection_bg = scale.blue[8] (upstream selection is an
+# alpha blend — nearest published opaque hex); ANSI from the ansi scale
+
+name = "github-dark"
+mode = "dark"
+
+bg = "#0d1117"
+bg_alt = "#161b22"
+fg = "#e6edf3"
+fg_dim = "#7d8590"
+accent = "#2f81f7"
+selection_bg = "#0c2d6b"
+selection_fg = "#e6edf3"
+cursor = "#2f81f7"
+border = "#30363d"
+
+color0 = "#484f58"
+color1 = "#ff7b72"
+color2 = "#3fb950"
+color3 = "#d29922"
+color4 = "#58a6ff"
+color5 = "#bc8cff"
+color6 = "#39c5cf"
+color7 = "#b1bac4"
+color8 = "#6e7681"
+color9 = "#ffa198"
+color10 = "#56d364"
+color11 = "#e3b341"
+color12 = "#79c0ff"
+color13 = "#d2a8ff"
+color14 = "#56d4dd"
+color15 = "#ffffff"

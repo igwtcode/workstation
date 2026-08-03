@@ -1,0 +1,76 @@
+# Homebrew formulae. GUI apps and fonts are casks: see mac-cask.txt.
+
+# build & gnu compat
+bash
+bash-completion@2
+cmake
+coreutils
+gawk
+gnu-sed
+grep
+make
+
+# shell & prompt
+herdr
+starship
+tmux
+zsh-autosuggestions
+zsh-completions
+zsh-syntax-highlighting
+
+# cli tools & utilities
+bat
+btop
+eza
+fastfetch
+fd
+fzf
+gum
+htop
+jq
+ripgrep
+superfile
+tldr
+tokei
+tree
+watch
+wget
+yq
+yt-dlp
+zoxide
+
+# networking
+tailscale
+
+# git & version control
+gh
+git
+git-delta
+git-remote-codecommit
+lazygit
+
+# editors
+neovim
+
+# devops & infra
+# docker CLI comes from the orbstack cask
+ansible
+aws-sam-cli
+awscli
+go-task
+hashicorp/tap/terraform
+helm
+k9s
+kubernetes-cli
+lazydocker
+
+# programming languages & runtimes
+bun
+go
+mise
+node
+rustup
+uv
+
+# ai tools
+opencode

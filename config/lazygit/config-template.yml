@@ -1,0 +1,48 @@
+# lazygit config for the active theme — rendered by `mise run theme` into
+# config.yml (found via XDG_CONFIG_HOME); edit this template only.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json
+# NOTE: no lazygit curly-brace placeholder options may appear here
+# (branchLogCmd, custom commands, …) — the theme renderer treats every
+# double-curly token as a palette token and dies on unknown ones.
+# Defaults cover those options; only theme colors live here.
+git:
+  log:
+    showWholeGraph: true
+    showGraph: when-maximised
+  allBranchesLogCmds:
+    - git log --graph --color=always --abbrev-commit --decorate --date=local --pretty=medium --
+  pagers:
+    # delta picks its colors up from the rendered git config ([delta] section)
+    - colorArg: always
+      pager: delta --paging=never --tabs=2
+gui:
+  useHunkModeInStagingView: false
+  timeFormat: 01/02 15:04:05
+  shortTimeFormat: "Today 15:04:05"
+  nerdFontsVersion: "3"
+  showRandomTip: false
+  showDivergenceFromBaseBranch: arrowAndNumber
+  showFileIcons: false
+  sidePanelWidth: 0.16
+  authorColors:
+    "*": "{{color4}}"
+  theme:
+    activeBorderColor:
+      - "{{accent}}"
+      - bold
+    inactiveBorderColor:
+      - "{{fg_dim}}"
+    optionsTextColor:
+      - "{{color4}}"
+    selectedLineBgColor:
+      - "{{bg_alt}}"
+    cherryPickedCommitBgColor:
+      - "{{selection_bg}}"
+    cherryPickedCommitFgColor:
+      - "{{accent}}"
+    unstagedChangesColor:
+      - "{{color1}}"
+    defaultFgColor:
+      - "{{fg}}"
+    searchingActiveBorderColor:
+      - "{{accent}}"

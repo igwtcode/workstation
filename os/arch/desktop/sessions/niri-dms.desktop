@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=niri · DMS
+Comment=niri compositor with DankMaterialShell
+Exec=env WS_SHELL=dms niri-session
+Type=Application
+DesktopNames=niri

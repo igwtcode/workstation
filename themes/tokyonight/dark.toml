@@ -1,0 +1,34 @@
+# tokyonight dark (night variant) — colors from the upstream extras:
+# https://github.com/folke/tokyonight.nvim/blob/main/extras/kitty/tokyonight_night.conf
+# https://github.com/folke/tokyonight.nvim/blob/main/extras/lua/tokyonight_night.lua
+# bg_alt = bg_dark; fg_dim = comment; border = bg_highlight; accent = blue
+
+name = "tokyonight-dark"
+mode = "dark"
+
+bg = "#1a1b26"
+bg_alt = "#16161e"
+fg = "#c0caf5"
+fg_dim = "#565f89"
+accent = "#7aa2f7"
+selection_bg = "#283457"
+selection_fg = "#c0caf5"
+cursor = "#c0caf5"
+border = "#292e42"
+
+color0 = "#15161e"
+color1 = "#f7768e"
+color2 = "#9ece6a"
+color3 = "#e0af68"
+color4 = "#7aa2f7"
+color5 = "#bb9af7"
+color6 = "#7dcfff"
+color7 = "#a9b1d6"
+color8 = "#414868"
+color9 = "#ff899d"
+color10 = "#9fe044"
+color11 = "#faba4a"
+color12 = "#8db0ff"
+color13 = "#c7a9ff"
+color14 = "#a4daff"
+color15 = "#c0caf5"

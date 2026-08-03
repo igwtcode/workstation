@@ -1,0 +1,13 @@
+# Btrfs snapshot stack — arch only; os/arch/snapshots.sh installs the common
+# section plus the one matching the detected bootloader.
+
+# common
+snap-pac
+snapper
+
+# grub bootloader
+grub-btrfs
+inotify-tools
+
+# limine bootloader
+limine-snapper-sync

@@ -1,0 +1,15 @@
+# Minimal server set; the install script maps distro-specific names.
+
+# core
+bat
+eza
+fd
+fzf
+git
+gum
+jq
+neovim
+ripgrep
+starship
+tmux
+zsh

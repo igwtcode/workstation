@@ -1,0 +1,48 @@
+# Rendered theme outputs — generated next to their templates inside linked
+# config dirs (the theme renderer writes into ~/.config, which symlinks
+# back into this repo). Templates are tracked; outputs never are.
+config/**/colors.sh
+config/**/colors.lua
+config/**/colors.toml
+config/**/colors.conf
+config/**/colors.yaml
+config/**/colors.tmTheme
+config/**/themes/colors
+config/starship/config.toml
+config/herdr/config.toml
+config/lazygit/config.yml
+config/lazydocker/config.yml
+config/git/config
+
+# Machine-local desktop pieces (monitor layout per machine)
+config/niri/local.kdl
+config/hypr/local.lua
+
+# Runtime droppings that apps write into linked dirs
+config/niri/noctalia.kdl
+config/noctalia/*
+!config/noctalia/settings.json
+config/nvim/lazy-lock.json.bak
+config/tmux/plugins/
+config/gh/hosts*
+config/gh/state*
+config/k9s/clusters/
+config/lazygit/state.yml
+config/btop/btop.log
+config/zed/*
+!config/zed/settings.json
+!config/zed/keymap.json
+.DS_Store
+
+# mise private local layer — secret env vars + tasks, restored from
+# 1Password (secrets:pull); never committed. .mise/tasks/local/ is a
+# normal task group dir (local:* tasks) that happens to be gitignored.
+mise.local.toml
+mise.local.lock
+.mise/tasks/local/
+
+# Local-only — machine notes, scratch work, anything not for the public repo
+.local/
+.claude/settings.local.json
+*.local
+.env

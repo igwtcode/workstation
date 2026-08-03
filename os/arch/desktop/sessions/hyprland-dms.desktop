@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Hyprland · DMS
+Comment=Hyprland compositor with DankMaterialShell
+Exec=env WS_SHELL=dms Hyprland
+Type=Application
+DesktopNames=Hyprland

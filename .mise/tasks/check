@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#MISE description="Lint and format-check all shell scripts (shellcheck + shfmt)"
+set -euo pipefail
+
+cd "${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}"
+
+# .gitignore is respected on purpose: it keeps rendered theme outputs
+# (config/*/colors.sh) and vendored third-party code (tmux's plugins/, which
+# `mise run sync` clones into the linked config dir) out of the lint set.
+# The private task group is gitignored too but is ours, so the explicit
+# .mise/tasks walk below picks it up regardless.
+mapfile -t scripts < <(
+  {
+    fd --hidden --type f --extension sh \
+      --exclude .git --exclude node_modules . 2>/dev/null ||
+      find . -path ./.git -prune -o -type f -name '*.sh' -print
+    # extensionless executables: file tasks and bin helpers
+    for d in .mise/tasks bin; do
+      [[ -d $d ]] && find "$d" -type f ! -name '*.md'
+    done
+  } | sort -u
+)
+
+if [[ ${#scripts[@]} -eq 0 ]]; then
+  echo "no shell scripts found"
+  exit 0
+fi
+
+status=0
+shellcheck --severity=style "${scripts[@]}" || status=1
+shfmt -d -i 2 -ci "${scripts[@]}" || status=1
+
+if [[ $status -eq 0 ]]; then
+  echo "OK: ${#scripts[@]} scripts clean"
+fi
+exit "$status"

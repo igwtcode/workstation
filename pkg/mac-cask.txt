@@ -1,0 +1,45 @@
+# Homebrew casks.
+
+# web browsers
+firefox
+google-chrome
+
+# security & passwords
+1password
+1password-cli
+
+# terminal emulators
+alacritty
+ghostty
+kitty
+
+# editors
+visual-studio-code
+zed
+
+# ai tools
+claude
+claude-code
+codex
+codex-app
+opencode-desktop
+
+# dev environments
+devpod
+
+# containers
+orbstack
+
+# launcher / productivity
+raycast
+
+# communication
+microsoft-teams
+telegram
+
+# fonts
+font-caskaydia-cove-nerd-font
+font-caskaydia-mono-nerd-font
+font-geist-mono-nerd-font
+font-jetbrains-mono-nerd-font
+font-meslo-lg-nerd-font

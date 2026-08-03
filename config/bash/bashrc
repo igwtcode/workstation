@@ -1,0 +1,25 @@
+# Minimal bash layer — zsh is the interactive shell everywhere; this keeps
+# the occasional plain `bash` session (and tools that spawn one) usable.
+
+# Before the interactive guard: bash has no .zshenv equivalent, so this is
+# the earliest hook available. Non-interactive bash still doesn't read this
+# file at all — which is why every script in this repo reads XDG paths as
+# ${XDG_STATE_HOME:-$HOME/.local/state} rather than assuming they are set.
+if [[ -r ~/.config/shell/xdg.sh ]]; then
+  # shellcheck source=config/shell/xdg.sh
+  source ~/.config/shell/xdg.sh
+fi
+
+[[ $- != *i* ]] && return
+
+export EDITOR=nvim
+export VISUAL=nvim
+export PATH=$PATH:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.local/bin
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias v='nvim'
+
+command -v starship &>/dev/null && eval "$(starship init bash)"

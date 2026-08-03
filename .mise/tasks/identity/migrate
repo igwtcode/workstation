@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+#MISE description="Move existing directories into a zone tree (e.g. ~/code/* -> ~/work/code)"
+#USAGE arg "<zone>" help="Destination zone (as configured in WS_ZONES)"
+#USAGE arg "[source]" help="Directory whose entries are offered (default: ~/code)"
+#USAGE flag "-d --dest <subdir>" help="Subdirectory inside the zone (default: code; empty moves to the zone root)"
+#USAGE flag "-a --all" help="Move every entry (skip the multi-select)"
+#USAGE flag "-n --dry-run" help="Report what would move without touching anything"
+#USAGE flag "-y --yes" help="Skip confirmations"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+# shellcheck source=lib/zone.sh
+source "$root/lib/zone.sh"
+
+[[ ${usage_yes:-false} == true ]] && export WS_YES=1
+[[ ${usage_dry_run:-false} == true ]] && export WS_DRY_RUN=1
+tag=""
+[[ ${WS_DRY_RUN:-0} == 1 ]] && tag="[dry-run] "
+
+require_cmd fd
+
+zone=${usage_zone:?zone is required}
+zone_line "$zone" >/dev/null # validates against WS_ZONES
+
+src=${usage_source:-$HOME/code}
+src=${src/#\~/$HOME}
+src=${src%/}
+[[ -d $src ]] || die "no such directory: $src"
+
+sub=${usage_dest-code}
+dest="$HOME/$zone${sub:+/$sub}"
+[[ $src != "$dest" ]] || die "source and destination are the same directory"
+
+mapfile -t entries < <(fd --max-depth 1 --type d --base-directory "$src" | sed 's:/$::' | sort)
+[[ ${#entries[@]} -gt 0 ]] || die "no directories to move under ${src/#$HOME/\~}"
+
+if [[ ${usage_all:-false} == true ]]; then
+  selected=("${entries[@]}")
+else
+  [[ -t 2 ]] || die "non-interactive session: pass --all to move everything"
+  require_cmd fzf
+  mapfile -t selected < <(printf '%s\n' "${entries[@]}" |
+    fzf --multi --height=60% --reverse --prompt="move into ~/$zone${sub:+/$sub}> ")
+  [[ ${#selected[@]} -gt 0 && -n ${selected[0]} ]] || die "nothing selected"
+fi
+
+# Moving the tree this repo lives in would pull the ground out from under
+# the running task (and its shell) — that one has to be done from outside.
+for entry in "${selected[@]}"; do
+  if [[ $root == "$src/$entry" || $root == "$src/$entry"/* ]]; then
+    die "'$entry' holds the workstation repo you are running from — move it from a shell outside it: mv '$src/$entry' '$dest/'"
+  fi
+done
+
+confirm "Move ${#selected[@]} director$([[ ${#selected[@]} == 1 ]] && echo y || echo ies) from ${src/#$HOME/\~} into ${dest/#$HOME/\~}?"
+
+zone_run mkdir -p "$dest"
+moved=0 skipped=0
+for entry in "${selected[@]}"; do
+  from="$src/$entry" to="$dest/$entry"
+  if [[ -e $to || -L $to ]]; then
+    styled 1 "$(printf '%-9s %s (target exists)' skipped "$entry")"
+    skipped=$((skipped + 1))
+    continue
+  fi
+  zone_run mv "$from" "$to"
+  styled 2 "${tag}$(printf '%-9s %s -> %s' moved "$entry" "$(zone_tilde "$to")")"
+  moved=$((moved + 1))
+done
+
+styled 2 "${tag}identity:migrate: $moved moved, $skipped skipped"
+[[ $moved -gt 0 && ${WS_DRY_RUN:-0} != 1 ]] &&
+  warn "shells and editors sitting in the old paths keep stale cwds — reopen them so the zone env applies"
+exit 0

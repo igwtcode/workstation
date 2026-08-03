@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+#MISE description="Bulk-clone repos from a configured forge (github, codecommit) into a zone tree"
+#USAGE arg "[forge]" help="Forge from WS_FORGES: kind or kind:source; omit for the picker"
+#USAGE flag "-z --zone <zone>" help="Clone with this zone's identity (gh/aws) instead of the current one"
+#USAGE flag "-a --all" help="Clone every repo (skip the multi-select)"
+#USAGE flag "-y --yes" help="Skip confirmations"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+# shellcheck source=lib/zone.sh
+source "$root/lib/zone.sh"
+
+[[ ${usage_yes:-false} == true ]] && export WS_YES=1
+all=${usage_all:-false}
+
+# This task runs from the repo, so it inherits the repo's zone; --zone
+# borrows another zone's gh/aws identity for the run.
+if [[ -n ${usage_zone:-} ]]; then
+  require_cmd jq mise
+  zone_export "$usage_zone"
+fi
+log "clone: identity zone ${WS_ZONE:-none}"
+
+require_cmd git
+
+[[ -n ${WS_FORGES:-} ]] ||
+  die "WS_FORGES is not set — define forge lines in mise.local.toml [env] (kind|source|dest, see README)"
+
+forges=()
+while IFS= read -r fline; do
+  fline=${fline%$'\r'}
+  [[ -z $fline || $fline == \#* ]] && continue
+  forges+=("$fline")
+done <<<"$WS_FORGES"
+[[ ${#forges[@]} -gt 0 ]] || die "WS_FORGES contains no forge lines"
+
+# resolve one forge line: positional arg > single configured line > picker
+sel=${usage_forge:-}
+forge=""
+if [[ -n $sel ]]; then
+  matches=()
+  for f in "${forges[@]}"; do
+    IFS='|' read -r kind src _ <<<"$f"
+    [[ $sel == "$kind" || $sel == "$kind:$src" ]] && matches+=("$f")
+  done
+  [[ ${#matches[@]} -gt 0 ]] || die "no forge in WS_FORGES matches '$sel'"
+  [[ ${#matches[@]} -eq 1 ]] || die "'$sel' is ambiguous — use kind:source"
+  forge=${matches[0]}
+elif [[ ${#forges[@]} -eq 1 ]]; then
+  forge=${forges[0]}
+else
+  forge=$(printf '%s\n' "${forges[@]}" | pick "forge>")
+  [[ -n $forge ]] || die "nothing selected"
+fi
+
+IFS='|' read -r kind src dest extra <<<"$forge"
+[[ -n $kind && -n $src && -n $dest ]] ||
+  die "malformed forge line '$forge' (expected kind|source|dest)"
+[[ -z ${extra:-} ]] ||
+  die "forge line '$forge' has leftover identity fields — commit identity now comes from the zone gitconfig (mise run identity); trim the line to kind|source|dest"
+dest=${dest/#\~/$HOME}
+
+# validate kind + tooling here, not in list_repos — a die inside the
+# process substitution below cannot stop the script
+case $kind in
+  github) require_cmd gh ;;
+  codecommit) require_cmd aws git-remote-codecommit jq ;;
+  *) die "unknown forge kind '$kind' (expected github|codecommit)" ;;
+esac
+
+# list_repos — one line per repo: "<display>TAB<clone-ref>"
+list_repos() {
+  case $kind in
+    github)
+      # a source containing "/" is one repo, not an owner — that is how the
+      # repo holding the work tooling gets cloned before that tooling exists
+      if [[ $src == */* ]]; then
+        printf '%s\t%s\n' "$src" "$src"
+      else
+        gh repo list "$src" --limit 1000 --json nameWithOwner \
+          --jq '.[].nameWithOwner' | awk '{print $1 "\t" $1}'
+      fi
+      ;;
+    codecommit)
+      aws codecommit list-repositories --profile "$src" --output json |
+        jq -r '.repositories[].repositoryName' |
+        awk -v p="$src" '{print $1 "\tcodecommit://" p "@" $1}'
+      ;;
+  esac
+}
+
+clone_repo() {
+  local ref=$1 dir=$2
+  mkdir -p "$(dirname "$dir")"
+  case $kind in
+    github) gh repo clone "$ref" "$dir" ;;
+    *) git clone "$ref" "$dir" ;;
+  esac
+}
+
+log "listing repos for $kind:$src ..."
+mapfile -t repos < <(list_repos | sort)
+[[ ${#repos[@]} -gt 0 ]] || die "no repos found for $kind:$src"
+
+if [[ $all == true ]]; then
+  selected=("${repos[@]}")
+else
+  if [[ ! -t 2 ]]; then
+    die "non-interactive session: pass --all to clone everything"
+  fi
+  require_cmd fzf
+  mapfile -t selected < <(printf '%s\n' "${repos[@]}" |
+    fzf --multi --height=60% --reverse --delimiter=$'\t' --with-nth=1 \
+      --prompt="repos ($kind:$src)> ")
+  [[ ${#selected[@]} -gt 0 && -n ${selected[0]} ]] || die "nothing selected"
+fi
+
+confirm "Clone/refresh ${#selected[@]} repo(s) into ${dest/#$HOME/\~}?"
+
+total=${#selected[@]} i=0 cloned=0 existing=0 failed=0
+for entry in "${selected[@]}"; do
+  i=$((i + 1))
+  display=${entry%%$'\t'*}
+  ref=${entry#*$'\t'}
+  dir="$dest/${display##*/}"
+  styled 4 "[$i/$total] ${dir/#$HOME/\~}"
+  if [[ -d $dir ]]; then
+    existing=$((existing + 1))
+  else
+    if ! clone_repo "$ref" "$dir"; then
+      warn "clone failed: $display"
+      failed=$((failed + 1))
+      continue
+    fi
+    cloned=$((cloned + 1))
+  fi
+done
+
+styled 2 "clone: $cloned cloned, $existing already present, $failed failed"
+[[ $failed -eq 0 ]]

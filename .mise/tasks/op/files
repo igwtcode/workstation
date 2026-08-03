@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+#MISE description="Restore or back up machine-local paths (aws, shell history, tool configs) as 1Password documents"
+#USAGE arg "[mode]" help="load (restore from 1Password) or save (back up); omit for a picker"
+#USAGE arg "[path]..." help="Specific ~/-relative path(s) from the list; omit for the picker"
+#USAGE flag "-a --all" help="Every configured path, no picker"
+#USAGE flag "-y --yes" help="Skip confirmations (does NOT widen the selection)"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+# shellcheck source=lib/op.sh
+source "$root/lib/op.sh"
+
+[[ ${usage_yes:-false} == true ]] && export WS_YES=1
+
+# Path list lives only in the private layer — never in this repo.
+entries() {
+  [[ -n ${WS_OP_FILES:-} ]] ||
+    die "WS_OP_FILES is not set — define the path list in mise.local.toml [env]"
+  printf '%s\n' "$WS_OP_FILES" | sed 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*$' || true
+}
+
+# Document title == the ~-relative path, with .zip appended for directories.
+# The vault then reads as a list of what is backed up, with no separate index
+# to keep in sync. Zip (not tar.gz) is deliberate: it is the format the
+# existing documents in the vault already use, and both formats travelling
+# side by side would be a silent trap on restore.
+doc_title() {
+  local rel=$1
+  [[ -d ${rel/#\~/$HOME} ]] && printf '%s.zip\n' "$rel" || printf '%s\n' "$rel"
+}
+
+# On load the local path usually does NOT exist yet (that is the point of
+# restoring), so the directory test above cannot pick the title — ask the
+# vault instead: a `<path>.zip` document means the entry is a directory.
+doc_title_remote() {
+  local rel=$1
+  if [[ -n $(op_doc_id "$rel.zip") ]]; then
+    printf '%s.zip\n' "$rel"
+  else
+    printf '%s\n' "$rel"
+  fi
+}
+
+mode=${usage_mode:-}
+[[ -n $mode ]] || mode=$(printf 'load\nsave\n' | pick "op:files>")
+[[ $mode == load || $mode == save ]] || die "unknown mode '$mode' (expected load|save)"
+
+mapfile -t all < <(entries)
+[[ ${#all[@]} -gt 0 ]] || die "WS_OP_FILES is empty"
+
+# Selection: explicit paths > --all > picker. --yes only skips the confirm;
+# it must never widen the selection to everything.
+picked=()
+if [[ -n ${usage_path:-} ]]; then
+  # usage joins variadic args with shell_words::join, so the documented way
+  # to read them back is an eval'd array (values may contain spaces)
+  wanted=()
+  eval "wanted=($usage_path)"
+  local_missing=0
+  # shellcheck disable=SC2154 # assigned by the eval above
+  for want in "${wanted[@]}"; do
+    printf '%s\n' "${all[@]}" | grep -qxF "$want" || {
+      warn "not in WS_OP_FILES: $want"
+      local_missing=1
+      continue
+    }
+    picked+=("$want")
+  done
+  [[ $local_missing -eq 0 ]] || die "configured paths: ${all[*]}"
+elif [[ ${usage_all:-false} == true ]]; then
+  picked=("${all[@]}")
+else
+  require_cmd fzf
+  [[ -t 2 ]] || die "no terminal for the picker — pass a path, or --all"
+  while IFS= read -r line; do
+    picked+=("$line")
+  done < <(printf '%s\n' "${all[@]}" |
+    fzf --multi --height=60% --reverse --prompt="op:files $mode> ")
+fi
+[[ ${#picked[@]} -gt 0 && -n ${picked[0]:-} ]] || die "nothing picked"
+
+log "op:files $mode: ${#picked[@]} of ${#all[@]} path(s)"
+printf '  %s\n' "${picked[@]}"
+confirm "$([[ $mode == save ]] &&
+  echo "Back these up to 1Password? (existing documents are replaced)" ||
+  echo "Restore these from 1Password? (existing local files are overwritten)")"
+op_ensure
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+failed=0
+for rel in "${picked[@]}"; do
+  [[ $rel == \~/* ]] || die "path must start with ~/ (got '$rel'): only \$HOME paths are portable across machines"
+  abs=${rel/#\~/$HOME}
+  [[ $mode == save ]] && title=$(doc_title "$rel") || title=$(doc_title_remote "$rel")
+
+  if [[ $mode == save ]]; then
+    if [[ ! -e $abs ]]; then
+      warn "skip $rel — not on this machine"
+      continue
+    fi
+    if [[ -d $abs ]]; then
+      require_cmd zip
+      # Archive paths are relative to the directory's PARENT, so the zip holds
+      # `<name>/...` and load can unzip it straight back into that parent.
+      (cd "$(dirname "$abs")" && zip -qr "$tmp/payload.zip" "$(basename "$abs")" -x '*.DS_Store')
+      op_doc_put "$title" "$tmp/payload.zip"
+    else
+      op_doc_put "$title" "$abs"
+    fi
+    log "saved $rel -> '$title'"
+  else
+    if ! op_doc_get "$title" "$tmp/payload" 2>/dev/null; then
+      warn "skip $rel — no 1Password document '$title'"
+      failed=1
+      continue
+    fi
+    if [[ $title == *.zip ]]; then
+      require_cmd unzip
+      mkdir -p "$(dirname "$abs")"
+      unzip -qo "$tmp/payload" -d "$(dirname "$abs")"
+    else
+      mkdir -p "$(dirname "$abs")"
+      install -m 600 "$tmp/payload" "$abs"
+    fi
+    log "restored $rel from '$title'"
+  fi
+  rm -f "$tmp/payload" "$tmp/payload.zip"
+done
+
+[[ $failed -eq 0 ]] || warn "some paths had no document yet — 'mise run op:files save' creates them"
+styled 2 "op:files: $mode done"

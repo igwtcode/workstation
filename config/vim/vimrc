@@ -1,0 +1,147 @@
+" let g:loaded_netrw = 1
+" let g:loaded_netrwPlugin = 1
+
+" Set leader key to space
+let mapleader = " "
+let maplocalleader = " "
+
+" Display absolute line numbers
+set number
+" Set number column width to 4
+set numberwidth=4
+" Display relative line numbers
+set relativenumber
+
+" Enable mouse support in all modes
+set mouse=a
+
+" Use system clipboard for all yank, delete, change, and put operations
+set clipboard+=unnamedplus
+
+" Indent wrapped lines to match the indentation of the first line
+set breakindent
+
+" Enable persistent undo so that undo history persists across sessions
+set undofile
+
+" Ignore case when searching
+set ignorecase
+
+" Enable smart case (ignore case unless search contains capital letters)
+set smartcase
+
+" Always show the sign column (to prevent UI shifting)
+set signcolumn=yes
+
+" Reduce time for Vim to trigger an update for swap and completion (in milliseconds)
+set updatetime=300
+
+" Set the time to wait for a mapped key sequence to complete (in milliseconds)
+set timeoutlen=360
+
+" Force horizontal splits to go below the current window
+set splitbelow
+" Force vertical splits to go to the right of the current window
+set splitright
+
+" Highlight the current line where the cursor is
+set cursorline
+
+" Minimum number of screen lines to keep above and below the cursor
+set scrolloff=15
+" Minimum number of screen columns on the sides of the cursor
+set sidescrolloff=15
+
+" Use spaces instead of tabs
+set expandtab
+" Set the number of spaces inserted for each indentation level
+set shiftwidth=2
+" Number of spaces per tab press in insert mode
+set softtabstop=2
+" Treat a tab character as 2 spaces
+set tabstop=2
+
+" Enable incremental search (show results as you type)
+set incsearch
+
+" Enable smart indentation when starting a new line
+set smartindent
+
+" Copy the indentation from the current line when starting a new line
+set autoindent
+
+" Disable backup files (avoid creating .bak files)
+set nobackup
+" Disable swapfile
+set noswapfile
+
+" Set the character encoding used internally by Vim
+set encoding=utf-8
+
+" File encoding used when writing a file
+set fileencoding=utf-8
+
+" Disable sound for error messages
+set noerrorbells
+
+" Avoid splitting words when wrapping lines
+set linebreak
+
+" Disable line wrapping (display long lines as one continuous line)
+set nowrap
+
+" Highlight all search results
+set hlsearch
+
+" Show concealed text normally in Markdown files
+set conceallevel=0
+
+" Enable 24-bit RGB colors in the terminal
+set termguicolors
+
+" Recognize hyphenated words as a single word for searching
+set iskeyword+=-
+
+" Allow backspace over indent, end of line, or insert mode start position
+set backspace=indent,eol,start
+
+" Uncomment to set a color column at 120 characters (helps with line length visibility)
+" set colorcolumn=120
+
+" Completion options for insert mode (show menu even with one option, no auto-insert, no preselect)
+set completeopt=menuone,noinsert,noselect
+
+" Don't auto insert comment leaders when wrapping or creating new lines in insert mode
+set formatoptions-=c
+set formatoptions-=r
+set formatoptions-=o
+
+" Allow hidden buffers without saving them first
+set hidden
+
+" Set popup menu height for completion options
+set pumheight=12
+
+" Shorten certain messages in completion mode
+set shortmess+=c
+
+" Hide tabline unless multiple tabs are open
+set showtabline=0
+
+" Disable write backup (prevents editing if the file is open in another program)
+set nowritebackup
+
+" Customize the cursor in various modes
+set guicursor=a:hor100-blinkon1
+
+" Enable buffer modification (optional and commented out)
+" set modifiable
+
+" Define which keys can move across lines in Normal and Insert modes
+" set whichwrap+=<,>,[,],h,l
+
+set wildmenu
+set modeline
+
+syntax on
+" colorscheme tokyonight-night

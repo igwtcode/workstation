@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#MISE description="Switch terminal theme: render color templates, run post-hooks, record the choice"
+#USAGE arg "[theme]" help="Theme id (e.g. gruvbox-dark); omit for the fzf picker"
+#USAGE flag "-l --list" help="List available theme ids and exit"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+# shellcheck source=lib/theme.sh
+source "$root/lib/theme.sh"
+
+if [[ ${usage_list:-false} == true ]]; then
+  theme_list "$root"
+  exit 0
+fi
+
+id=${usage_theme:-}
+if [[ -z $id ]]; then
+  current=$(theme_current)
+  id=$(theme_list "$root" | pick "theme${current:+ ($current)}>")
+  [[ -n $id ]] || die "nothing selected"
+fi
+
+theme_apply "$root" "$id"

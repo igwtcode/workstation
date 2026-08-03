@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+#MISE description="Apply the symlink manifest (repo -> HOME) for this machine's profile"
+#USAGE flag "-p --profile <profile>" help="Profile override (default: detected)" {
+#USAGE   choices "mac" "arch" "server"
+#USAGE }
+#USAGE flag "-n --dry-run" help="Report what would change without touching anything"
+#USAGE flag "-y --yes" help="Replace existing files without prompting (still backs up to *.pre-ws)"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+# shellcheck source=lib/manifest.sh
+source "$root/lib/manifest.sh"
+
+if [[ ${usage_yes:-false} == true ]]; then
+  export WS_YES=1
+fi
+if [[ ${usage_dry_run:-false} == true ]]; then
+  export WS_DRY_RUN=1
+fi
+
+# --- post-sync hooks: the few non-link steps sync owns ----------------------
+
+# hook <description> <cmd>... — announce and run (announce only in dry-run)
+hook() {
+  local desc=$1
+  shift
+  if [[ ${WS_DRY_RUN:-0} == 1 ]]; then
+    log "[dry-run] hook: $desc"
+    return 0
+  fi
+  log "hook: $desc"
+  "$@"
+}
+
+_bat_cache() { bat cache --build >/dev/null; }
+
+_install_tpm() {
+  local dir=$HOME/.config/tmux/plugins/tpm
+  git clone --depth=1 https://github.com/tmux-plugins/tpm "$dir"
+  "$dir/bin/install_plugins"
+}
+
+post_sync_hooks() {
+  if ws_has bat; then
+    hook "rebuild bat cache" _bat_cache
+  fi
+
+  if ws_has git && [[ -d $HOME/.config/tmux && ! -d $HOME/.config/tmux/plugins/tpm ]]; then
+    hook "install tmux plugin manager (tpm)" _install_tpm
+  fi
+}
+
+# --- main --------------------------------------------------------------------
+
+profile=$(resolve_profile "${usage_profile:-}")
+log "sync: profile $profile${WS_DRY_RUN:+ (dry-run)}"
+
+# `while read`, not `mapfile`: sync must also work under Apple's /bin/bash
+# 3.2, which is what a mac has until brew installs bash from pkg/mac-brew.txt
+manifests=()
+while IFS= read -r manifest; do
+  manifests+=("$manifest")
+done < <(manifest_files "$root" "$profile")
+manifest_apply "$root" "${manifests[@]}"
+
+post_sync_hooks

@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+#MISE description="Update the OS package manager only: refresh, upgrade, clean up (brew on mac, paru+paccache on arch)"
+#USAGE flag "-a --all" help="Full scope: on mac also upgrade self-updating casks (brew upgrade --greedy)"
+#USAGE flag "-y --yes" help="Skip confirmations (package ops run with --noconfirm)"
+#USAGE flag "-n --dry-run" help="List the steps that would run without executing anything"
+#USAGE flag "-c --check" help="Only report what is outdated; change nothing"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+
+if [[ ${usage_yes:-false} == true ]]; then
+  export WS_YES=1
+fi
+if [[ ${usage_dry_run:-false} == true ]]; then
+  export WS_DRY_RUN=1
+fi
+all=${usage_all:-false}
+check=${usage_check:-false}
+
+summary=()
+
+# step <description> <cmd>... — announce, run (announce only in dry-run),
+# record for the end-of-run summary. Failure propagates to the caller.
+step() {
+  local desc=$1 rc=0
+  shift
+  if [[ ${WS_DRY_RUN:-0} == 1 ]]; then
+    log "[dry-run] $desc"
+    return 0
+  fi
+  styled 4 "==> $desc"
+  "$@" || rc=$?
+  [[ $rc -eq 0 ]] || return "$rc"
+  summary+=("$desc")
+}
+
+# --- mac --------------------------------------------------------------------
+
+check_mac() {
+  brew update
+  styled 4 "==> outdated formulae"
+  brew outdated --formula --verbose || true
+  styled 4 "==> outdated casks"
+  brew outdated --cask --verbose --greedy || true
+}
+
+update_mac() {
+  # Homebrew 6 asks for confirmation before an upgrade that touches anything
+  # beyond the named args — which a bare `brew upgrade` always does. --yes is
+  # the mac counterpart of arch's --noconfirm; without it the plan is shown
+  # and confirmed, which is the point of running this interactively.
+  [[ ${WS_YES:-0} == 1 ]] && export HOMEBREW_NO_ASK=1
+  step "brew: refresh package metadata" brew update
+  local args=(upgrade) desc="brew: upgrade formulae + casks"
+  if [[ $all == true ]]; then
+    args+=(--greedy)
+    desc+=" (greedy — includes self-updating casks)"
+  fi
+  step "$desc" brew "${args[@]}"
+  # autoremove first: dropping unused deps makes cleanup's work smaller
+  step "brew: remove no-longer-needed dependencies" brew autoremove
+  step "brew: clean stale downloads and old versions" brew cleanup --prune=all
+}
+
+# --- arch -------------------------------------------------------------------
+
+check_arch() {
+  # -Sy then -Qu is the safe read-only path: refresh the db, list upgrades,
+  # never install (a bare -Sy followed by a partial install is the footgun,
+  # and nothing here installs)
+  sudo pacman -Sy
+  styled 4 "==> outdated packages"
+  paru -Qu || true
+}
+
+update_arch() {
+  local args=(-Syu)
+  [[ ${WS_YES:-0} == 1 ]] && args+=(--noconfirm)
+  step "pacman cache: clear partial downloads" sudo rm -f /var/cache/pacman/pkg/download-*
+  step "paru: full system upgrade (repo + AUR)" paru "${args[@]}"
+  if ws_has paccache; then
+    step "paccache: keep 2 recent versions of installed packages" sudo paccache -rk2
+    step "paccache: drop cached versions of uninstalled packages" sudo paccache -ruk0
+  else
+    warn "paccache not found (pacman-contrib) — skipping cache pruning"
+  fi
+  # orphans (installed as deps, nothing needs them any more): report only —
+  # removing packages is never automatic
+  local orphans
+  orphans=$(paru -Qdtq 2>/dev/null | tr '\n' ' ' || true)
+  [[ -n ${orphans// /} ]] &&
+    warn "orphans, review before removing with 'paru -Rns \$(paru -Qdtq)': ${orphans% }"
+  return 0
+}
+
+# --- main --------------------------------------------------------------------
+
+profile=$(resolve_profile)
+
+if [[ $check == true ]]; then
+  case $profile in
+    mac) require_cmd brew && check_mac ;;
+    arch) require_cmd paru && check_arch ;;
+    server) die "server profile: no managed package step" ;;
+  esac
+  exit 0
+fi
+
+log "pkg: profile $profile${WS_DRY_RUN:+ (dry-run)}"
+
+case $profile in
+  mac)
+    require_cmd brew
+    update_mac
+    ;;
+  arch)
+    require_cmd paru
+    update_arch
+    ;;
+  server) die "server profile: no managed package step — use the distro's own package manager" ;;
+esac
+
+if [[ ${WS_DRY_RUN:-0} == 1 ]]; then
+  log "dry-run: nothing was executed"
+else
+  styled 2 "pkg: done — ${#summary[@]} steps:"
+  printf '  • %s\n' "${summary[@]}"
+fi

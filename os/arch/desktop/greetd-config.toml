@@ -1,0 +1,10 @@
+# greetd + DMS greeter — installed to /etc/greetd/config.toml by
+# os/arch/desktop/setup.sh. The greeter draws inside its own niri
+# instance; sessions are picked from /usr/share/wayland-sessions.
+
+[terminal]
+vt = 1
+
+[default_session]
+user = "greeter"
+command = "dms-greeter --command niri"

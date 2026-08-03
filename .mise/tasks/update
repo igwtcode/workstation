@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+#MISE description="Update this machine (machine-mutating): repo pull, packages, shared tools, re-sync"
+#USAGE flag "-a --all" help="Full scope: on mac also upgrade self-updating casks (brew upgrade --greedy)"
+#USAGE flag "-y --yes" help="Skip confirmations (package ops run with --noconfirm)"
+#USAGE flag "-n --dry-run" help="List the steps that would run without executing anything"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+
+if [[ ${usage_yes:-false} == true ]]; then
+  export WS_YES=1
+fi
+if [[ ${usage_dry_run:-false} == true ]]; then
+  export WS_DRY_RUN=1
+fi
+all=${usage_all:-false}
+
+summary=()
+
+# step <description> <cmd>... — announce, run (announce only in dry-run),
+# record for the end-of-run summary. Failure propagates to the caller.
+step() {
+  local desc=$1 rc=0
+  shift
+  if [[ ${WS_DRY_RUN:-0} == 1 ]]; then
+    log "[dry-run] $desc"
+    return 0
+  fi
+  styled 4 "==> $desc"
+  "$@" || rc=$?
+  [[ $rc -eq 0 ]] || return "$rc"
+  summary+=("$desc")
+}
+
+# --- repo self-update --------------------------------------------------------
+
+repo_pull() {
+  if ! git -C "$root" diff --quiet || ! git -C "$root" diff --cached --quiet; then
+    warn "repo has local changes — skipping self-update (git pull)"
+    return 0
+  fi
+  # offline or missing upstream must not block the rest of the update
+  step "repo: pull latest (ff-only)" git -C "$root" pull --ff-only ||
+    warn "repo pull failed — continuing with the local checkout"
+}
+
+# --- per-OS packages ---------------------------------------------------------
+#
+# The package half lives in its own task (`mise run pkg`) so it can be run
+# on its own; this passes the same flags through instead of duplicating it.
+
+update_packages() {
+  local args=()
+  [[ $all == true ]] && args+=(--all)
+  [[ ${WS_YES:-0} == 1 ]] && args+=(--yes)
+  [[ ${WS_DRY_RUN:-0} == 1 ]] && args+=(--dry-run)
+  step "packages: OS package manager upgrade + cleanup" mise run pkg "${args[@]}"
+}
+
+# --- shared steps ------------------------------------------------------------
+
+update_shared_tools() {
+  if ws_has rustup; then
+    step "rustup: update toolchains" rustup update
+  fi
+  if ws_has tldr; then
+    step "tldr: refresh page cache" tldr --update
+  fi
+  # mise itself is paru/brew-managed (self-update is disabled for package
+  # manager installs); this only bumps the repo dev tools in .mise/config.toml
+  step "mise: upgrade repo dev tools" mise up
+}
+
+# --- main --------------------------------------------------------------------
+
+profile=$(resolve_profile)
+log "update: profile $profile${WS_DRY_RUN:+ (dry-run)}"
+
+repo_pull
+
+case $profile in
+  arch | mac) update_packages ;;
+  server) log "server profile: no managed package step" ;;
+esac
+
+update_shared_tools
+
+step "sync: re-apply symlink manifest" mise run sync
+
+if [[ ${WS_DRY_RUN:-0} == 1 ]]; then
+  log "dry-run: nothing was executed"
+else
+  styled 2 "update complete — ${#summary[@]} steps:"
+  printf '  • %s\n' "${summary[@]}"
+fi

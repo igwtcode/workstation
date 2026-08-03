@@ -1,0 +1,126 @@
+// Zed keymap — LazyVim-flavored, tmux-style navigation
+//
+// Base keymap is VSCode (set in settings.json: "base_keymap": "VSCode").
+// This file layers a LazyVim/tmux workflow on top of it.
+//
+// Docs: https://zed.dev/docs/key-bindings
+// See defaults with `zed: open default keymap` from the command palette.
+
+[
+	// ===========================================================================
+	// tmux-style seamless navigation: ctrl-h/j/k/l moves focus across editor
+	// splits AND docks (terminal, project panel, git/agent panels).
+	// workspace::ActivatePane{Left,Right,Up,Down} are the dock-aware variants.
+	// ===========================================================================
+	{
+		"context": "Editor && VimControl && !VimWaiting && !menu",
+		"bindings": {
+			"ctrl-h": "workspace::ActivatePaneLeft",
+			"ctrl-j": "workspace::ActivatePaneDown",
+			"ctrl-k": "workspace::ActivatePaneUp",
+			"ctrl-l": "workspace::ActivatePaneRight"
+		}
+	},
+	{
+		"context": "Terminal",
+		"bindings": {
+			"ctrl-h": "workspace::ActivatePaneLeft",
+			"ctrl-j": "workspace::ActivatePaneDown",
+			"ctrl-k": "workspace::ActivatePaneUp",
+			"ctrl-l": "workspace::ActivatePaneRight",
+			"alt-z": "workspace::ToggleZoom"
+		}
+	},
+	{
+		// Docks = project panel, outline panel, git panel, agent/AI panel, etc.
+		"context": "Dock",
+		"bindings": {
+			"ctrl-h": "workspace::ActivatePaneLeft",
+			"ctrl-j": "workspace::ActivatePaneDown",
+			"ctrl-k": "workspace::ActivatePaneUp",
+			"ctrl-l": "workspace::ActivatePaneRight"
+		}
+	},
+
+	// ===========================================================================
+	// LazyVim leader (space) bindings — normal & visual mode.
+	// ===========================================================================
+	{
+		"context": "Editor && VimControl && !VimWaiting && !menu",
+		"bindings": {
+			// -- find / files ------------------------------------------------------
+			"space space": "file_finder::Toggle", // find files (root)
+			"space f f": "file_finder::Toggle", // find files
+			"space f r": "file_finder::Toggle", // recents (empty-query file finder)
+			"space f b": "tab_switcher::Toggle", // buffers
+			"space ,": "tab_switcher::Toggle", // buffers
+			"space f p": "projects::OpenRecent", // recent projects
+
+			// -- search ------------------------------------------------------------
+			"space /": "pane::DeploySearch", // grep (project)
+			"space s g": "pane::DeploySearch", // grep (project)
+			"space s w": "pane::DeploySearch", // grep word/selection (seeds from visual selection)
+			"space s s": "outline::Toggle", // document symbols
+			"space s S": "project_symbols::Toggle", // workspace symbols
+			"space s d": "diagnostics::Deploy", // project diagnostics
+			"space :": "command_palette::Toggle", // commands
+
+			// -- code (LSP) --------------------------------------------------------
+			"space c a": "editor::ToggleCodeActions",
+			"space c r": "editor::Rename",
+			"space c f": "editor::Format",
+
+			// -- goto --------------------------------------------------------------
+			"g d": "editor::GoToDefinition",
+			"g D": "editor::GoToDeclaration",
+			"g r": "editor::FindAllReferences",
+			"g I": "editor::GoToImplementation",
+			"g y": "editor::GoToTypeDefinition",
+			"g c c": "editor::ToggleComments",
+			"shift-k": "editor::Hover",
+			"g v": "editor::GoToDefinitionSplit",
+
+			// -- diagnostics navigation -------------------------------------------
+			"[ d": "editor::GoToDiagnostic",
+			"] d": "editor::GoToPreviousDiagnostic",
+
+			// -- panels / UI -------------------------------------------------------
+			"space e": "project_panel::ToggleFocus", // explorer
+			"space g g": "git_panel::ToggleFocus", // git
+			"space a a": "agent::ToggleFocus", // AI / agent panel
+			// "ctrl-/": "terminal_panel::ToggleFocus", // terminal
+			"alt-z": "workspace::ToggleZoom",
+
+			// -- windows / splits --------------------------------------------------
+			"space -": "pane::SplitDown",
+			"space \\": "pane::SplitRight",
+
+			// -- buffers -----------------------------------------------------------
+			// "space b d": "pane::CloseActiveItem",
+			"space q": "pane::CloseActiveItem"
+		}
+	},
+
+	// ===========================================================================
+	// Normal-mode-only: S-h / S-l switch buffers (LazyVim). Scoped to normal so
+	// it doesn't clobber visual-mode H/L (top/bottom-of-screen) selection.
+	// ===========================================================================
+	{
+		"context": "Editor && vim_mode == normal && !VimWaiting && !menu",
+		"bindings": {
+			"shift-h": "pane::ActivatePreviousItem",
+			"shift-l": "pane::ActivateNextItem"
+		}
+	},
+
+	// ===========================================================================
+	// Visual mode: move selected lines up/down (S-j / S-k).
+	// ===========================================================================
+	{
+		"context": "Editor && vim_mode == visual && !VimWaiting && !VimObject",
+		"bindings": {
+			"shift-j": "editor::MoveLineDown",
+			"shift-k": "editor::MoveLineUp"
+		}
+	}
+]

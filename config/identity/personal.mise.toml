@@ -1,0 +1,10 @@
+# SEED for ~/personal/mise.toml — see work.mise.toml.
+
+[env]
+WS_ZONE = "personal"
+WS_CODE_ROOT = "{{env.HOME}}/personal/code"
+GH_CONFIG_DIR = "{{env.HOME}}/.config/gh-personal"
+CLAUDE_CONFIG_DIR = "{{env.HOME}}/.config/claude-personal"
+AWS_CONFIG_FILE = "{{env.HOME}}/.aws/personal-config"
+AWS_SHARED_CREDENTIALS_FILE = "{{env.HOME}}/.aws/personal-credentials"
+KUBECONFIG = "{{env.HOME}}/.kube/personal-config"

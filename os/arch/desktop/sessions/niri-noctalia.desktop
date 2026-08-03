@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=niri · noctalia
+Comment=niri compositor with the noctalia shell
+Exec=env WS_SHELL=noctalia niri-session
+Type=Application
+DesktopNames=niri

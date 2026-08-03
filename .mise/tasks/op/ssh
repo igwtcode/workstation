@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#MISE description="Restore or back up ~/.ssh via a 1Password document (tar.gz bundle)"
+#USAGE arg "[mode]" help="load (restore from 1Password) or save (back up); omit for a picker"
+#USAGE flag "-y --yes" help="Skip confirmations"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+# shellcheck source=lib/op.sh
+source "$root/lib/op.sh"
+
+[[ ${usage_yes:-false} == true ]] && export WS_YES=1
+
+# Title follows the op:files convention (the ~-path, .zip for a directory),
+# so one naming scheme covers every document this repo touches.
+doc_title=${WS_OP_SSH_DOC:-~/.ssh.zip}
+
+mode=${usage_mode:-}
+[[ -n $mode ]] || mode=$(printf 'load\nsave\n' | pick "op:ssh>")
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+case $mode in
+  save)
+    [[ -d $HOME/.ssh ]] || die "no .ssh dir in \$HOME — nothing to back up"
+    require_cmd zip
+    confirm "Back up ~/.ssh to 1Password document '$doc_title'?"
+    op_ensure
+    (cd "$HOME" && zip -qr "$tmp/ssh.zip" .ssh -x '*.DS_Store')
+    op_doc_put "$doc_title" "$tmp/ssh.zip"
+    log "backed up ~/.ssh → 1Password document '$doc_title'"
+    ;;
+  load)
+    require_cmd unzip
+    confirm "Restore ~/.ssh from 1Password document '$doc_title'? (existing files are overwritten)"
+    op_ensure
+    op_doc_get "$doc_title" "$tmp/ssh.zip"
+    unzip -qo "$tmp/ssh.zip" -d "$HOME"
+    # private keys must not be group/world readable, whatever the archive said
+    chmod 700 "$HOME/.ssh"
+    find "$HOME/.ssh" -type f ! -name '*.pub' ! -name 'known_hosts*' -exec chmod 600 {} +
+    log "restored ~/.ssh from '$doc_title'"
+    ;;
+  *) die "unknown mode '$mode' (expected load|save)" ;;
+esac

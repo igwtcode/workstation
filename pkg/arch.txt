@@ -1,0 +1,281 @@
+# Installed via `paru -S --needed` by the arch bootstrap.
+# Snapshot stack lives in arch-snapshots.txt.
+
+# base system & build tools
+base
+base-devel
+cmake
+dialog
+dosfstools
+less
+make
+man-db
+man-pages
+mtools
+pacman-contrib
+reflector
+
+# shell & prompt
+bash-completion
+herdr-bin
+starship
+tmux
+zsh
+zsh-autosuggestions
+zsh-completions
+zsh-syntax-highlighting
+
+# cli tools & utilities
+accountsservice
+bat
+btop
+cava
+cliphist
+eza
+fastfetch
+fd
+ffmpeg
+ffmpegthumbnailer
+fzf
+go-yq
+gum
+htop
+imagemagick
+jq
+matugen
+plocate
+poppler
+qt6-multimedia-ffmpeg
+ripgrep
+superfile
+tldr
+tokei
+tumbler
+usage
+vlc-plugins-all
+wl-clipboard
+wtype
+xclip
+xdg-user-dirs
+xdg-utils
+zoxide
+
+# networking
+bridge-utils
+curl
+dnsmasq
+dnsutils
+freerdp
+inetutils
+ipset
+iptables
+networkmanager
+nm-connection-editor
+nss-mdns
+openbsd-netcat
+openssh
+rsync
+tailscale
+wget
+wireguard-tools
+wpa_supplicant
+
+# filesystem tools
+btrfs-progs
+fuse2
+fuse-overlayfs
+nfs-utils
+ntfs-3g
+xfsprogs
+
+# compression & archiving
+7zip
+bzip2
+bzip3
+pigz
+unrar
+unzip
+wavpack
+zip
+
+# power & hardware
+acpi
+acpi_call
+acpid
+brightnessctl
+ddcutil
+dmidecode
+power-profiles-daemon
+sof-firmware
+udiskie
+v4l-utils
+
+# bluetooth
+blueman
+bluez
+
+# audio (pipewire stack)
+alsa-utils
+pavucontrol
+pipewire
+pipewire-alsa
+pipewire-audio
+pipewire-jack
+pipewire-libcamera
+pipewire-pulse
+wireplumber
+
+# security & passwords
+1password
+1password-cli
+ufw
+
+# wayland desktop — compositors, shells, greeter
+dms-shell
+greetd
+greetd-dms-greeter-bin
+grim
+hyprland
+hyprshot
+niri
+noctalia-shell
+polkit-gnome
+qt5-wayland
+qt6-svg
+qt6-wayland
+qt6ct
+slurp
+wlsunset
+xdg-desktop-portal
+xdg-desktop-portal-gnome
+xdg-desktop-portal-gtk
+xdg-desktop-portal-hyprland
+xwayland-satellite
+
+# theming & appearance
+adw-gtk-theme
+capitaine-cursors
+nwg-look
+papirus-icon-theme
+
+# gpu & graphics
+vulkan-intel
+vulkan-tools
+
+# fonts
+noto-fonts
+noto-fonts-emoji
+otf-font-awesome
+otf-geist-mono-nerd
+terminus-font
+ttf-cascadia-code-nerd
+ttf-cascadia-mono-nerd
+ttf-jetbrains-mono-nerd
+ttf-meslo-nerd
+
+# terminal emulators
+alacritty
+ghostty
+kitty
+
+# editors
+nano
+neovim
+vim
+visual-studio-code-bin
+zed
+
+# file managers & document viewers
+evince
+file-roller
+gvfs
+gvfs-smb
+loupe
+nautilus
+zathura
+
+# gnome utilities
+evolution-data-server
+gnome-calculator
+gnome-characters
+gnome-clocks
+gnome-disk-utility
+gnome-font-viewer
+gnome-logs
+gnome-system-monitor
+
+# web browsers
+firefox
+google-chrome
+
+# media & communication
+mpv
+obs-studio
+teams-for-linux
+telegram-desktop
+thunderbird
+vlc
+yt-dlp
+
+# git & version control
+git
+git-delta
+git-remote-codecommit
+github-cli
+lazygit
+
+# programming languages & runtimes
+biome
+bun
+go
+mise
+npm
+python
+python-pip
+python-virtualenv
+rust-analyzer
+rustup
+uv
+
+# python libraries
+python-boto3
+python-cfn-lint
+python-yaml
+
+# ai tools
+claude-code
+claude-desktop
+openai-codex
+opencode
+opencode-desktop-bin
+
+# devops & infra
+ansible
+ansible-lint
+aws-cli-v2
+aws-sam-cli-bin
+devpod-bin
+docker
+docker-buildx
+docker-compose
+fluxcd
+go-task
+helm
+k9s
+kubectl
+lazydocker
+opensearch-cli
+opentofu
+terraform
+
+# virtualisation
+cloud-image-utils
+edk2-ovmf
+libvirt
+qemu-full
+swtpm
+virt-manager
+virt-viewer
+
+# flatpak
+flatpak

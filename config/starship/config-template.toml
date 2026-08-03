@@ -1,0 +1,52 @@
+# starship config for the active theme — rendered by `mise run theme` into
+# config.toml (STARSHIP_CONFIG points there); edit this template only.
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+${env_var.WS_ZONE}\
+$directory\
+$git_branch\
+$git_status\
+$cmd_duration\
+$character"""
+
+add_newline = false
+
+palette = "colors"
+
+# Which identity zone (~/work, ~/personal) the shell is in — set by the
+# zone's mise config, so it renders nothing outside every zone.
+[env_var.WS_ZONE]
+variable = "WS_ZONE"
+format = "[$env_value ](fg:warn)"
+
+[directory]
+format = "[$path ](fg:primary)"
+truncate_to_repo = true
+truncation_length = 3
+
+[git_branch]
+format = '[$branch ](fg:secondary)'
+
+[git_status]
+format = '[($all_status$ahead_behind )](fg:warn)'
+
+[cmd_duration]
+min_time = 999
+format = "[$duration ](fg:muted)"
+show_milliseconds = false
+
+[character]
+success_symbol = '[\$](fg:primary)'
+error_symbol = '[\$](bold fg:danger)'
+vimcmd_symbol = "[N](bold fg:primary)"
+vimcmd_replace_one_symbol = "[R](bold fg:primary)"
+vimcmd_replace_symbol = "[R](bold fg:primary)"
+vimcmd_visual_symbol = "[V](bold fg:muted)"
+
+[palettes.colors]
+primary = '{{accent}}'
+secondary = '{{color4}}'
+warn = '{{color3}}'
+danger = '{{color9}}'
+muted = '{{fg_dim}}'
