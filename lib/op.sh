@@ -37,16 +37,22 @@ op_doc_list() {
 }
 
 # op_doc_get <title> <dest> — download via a temp path (--out-file refuses
-# to overwrite)
+# to overwrite).
+#
+# The scratch dir is `td`, not `tmp`: callers keep a global `tmp` with a
+# `trap 'rm -rf "$tmp"' EXIT`, and an EXIT trap runs in the scope of whatever
+# function called exit. A local named `tmp` would shadow it, so any `die` in
+# here would leave the trap staring at an unset variable — `set -u` then
+# turns a clear error into "tmp: unbound variable".
 op_doc_get() {
-  local title=$1 dest=$2 id tmp
+  local title=$1 dest=$2 id td
   id=$(op_doc_id "$title")
   [[ -n $id ]] || die "1Password document not found: '$title'"
-  tmp=$(mktemp -d)
-  op document get "$id" --out-file "$tmp/doc" >/dev/null
+  td=$(mktemp -d)
+  op document get "$id" --out-file "$td/doc" >/dev/null
   mkdir -p "$(dirname "$dest")"
-  mv -f "$tmp/doc" "$dest"
-  rmdir "$tmp"
+  mv -f "$td/doc" "$dest"
+  rmdir "$td"
 }
 
 # op_doc_put <title> <file> — create the document, or update it in place
@@ -64,12 +70,13 @@ op_doc_put() {
 }
 
 # op_inject <template> <dest> — materialize op:// references via a temp file
+# (scratch dir named `td` for the reason spelled out above op_doc_get)
 op_inject() {
-  local template=$1 dest=$2 tmp
+  local template=$1 dest=$2 td
   [[ -f $template ]] || die "no such template: $template"
-  tmp=$(mktemp -d)
-  op inject --in-file "$template" --out-file "$tmp/out" >/dev/null
+  td=$(mktemp -d)
+  op inject --in-file "$template" --out-file "$td/out" >/dev/null
   mkdir -p "$(dirname "$dest")"
-  mv -f "$tmp/out" "$dest"
-  rmdir "$tmp"
+  mv -f "$td/out" "$dest"
+  rmdir "$td"
 }
