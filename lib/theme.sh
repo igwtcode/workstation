@@ -20,7 +20,12 @@ WS_THEME_TOKENS=(
   color8 color9 color10 color11 color12 color13 color14 color15
 )
 
-declare -gA WS_THEME=()
+# Associative arrays need bash 4+, and a mac runs Apple's 3.2 until brew
+# installs bash from pkg/mac-brew.txt. Sourcing has to stay harmless there —
+# bootstrap reads theme_current before that install; rendering refuses below.
+if ((${BASH_VERSINFO[0]:-0} >= 4)); then
+  declare -gA WS_THEME=()
+fi
 
 # theme_list <repo-root> — print available theme ids (<name>-<mode>)
 theme_list() {
@@ -51,6 +56,8 @@ theme_palette_file() {
 # derive *_strip forms, and enforce the full token contract.
 theme_load() {
   local file=$1 line key val
+  ((${BASH_VERSINFO[0]:-0} >= 4)) ||
+    die "theme rendering needs bash 4+ (running $BASH_VERSION) — run 'brew install bash' and re-run"
   WS_THEME=()
   while IFS= read -r line || [[ -n $line ]]; do
     [[ $line =~ ^[[:space:]]*([a-z0-9_]+)[[:space:]]*=[[:space:]]*\"([^\"]*)\" ]] || continue

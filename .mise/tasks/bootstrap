@@ -19,7 +19,17 @@ export WS_PROFILE=$profile
 
 case $profile in
   arch) "$root/os/arch/bootstrap.sh" "$profile" ;;
-  mac) "$root/os/mac/bootstrap.sh" "$profile" ;;
+  mac)
+    "$root/os/mac/bootstrap.sh" "$profile"
+    # brew's bash lands above; every child `mise run` below needs it on PATH,
+    # since /bin/bash is 3.2 and the steps after sync use bash 4 features
+    for prefix in /opt/homebrew /usr/local; do
+      if [[ -x $prefix/bin/brew ]]; then
+        eval "$("$prefix/bin/brew" shellenv)"
+        break
+      fi
+    done
+    ;;
   server) "$root/os/server/install.sh" "$profile" ;;
 esac
 
