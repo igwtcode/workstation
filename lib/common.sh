@@ -86,7 +86,9 @@ pick() {
   if [[ ! -t 2 ]]; then
     die "non-interactive session: cannot show a picker — pass the value directly"
   fi
-  fzf --height=40% --reverse --prompt="$prompt "
+  # --no-multi on purpose: callers consume exactly one value, and the
+  # interactive shell turns --multi on globally via FZF_DEFAULT_OPTS
+  fzf --height=40% --reverse --no-multi --prompt="$prompt "
 }
 
 # os_detect — mac | arch | linux (generic: debian/ubuntu/fedora/…).

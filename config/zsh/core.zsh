@@ -59,6 +59,7 @@ export PATH=$PATH:$GOPATH/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin
 export FZF_DEFAULT_OPTS=" \
 --preview-window='border-rounded' --prompt='❯ ' \
 --marker='● ' --pointer='▶ ' --separator='─' --scrollbar='▌' --highlight-line \
+--multi --bind 'ctrl-a:select-all,ctrl-alt-a:deselect-all' \
 --layout=reverse"
 
 # Theme-rendered color snippets (`mise run theme` writes these; the config
@@ -128,7 +129,7 @@ yta() { yt-dlp --cookies-from-browser firefox --no-playlist --progress -x --audi
 gb() {
   local branch
   branch=$(git branch -a | grep -v 'HEAD ->' | sed 's/^[* ]*//' | sed 's|remotes/||' | sort -u |
-    fzf --preview "git log --oneline --color=always {}" --prompt "Git branch: ")
+    fzf --no-multi --preview "git log --oneline --color=always {}" --prompt "Git branch: ")
   [[ -n "$branch" ]] && { git switch "${branch#origin/}"; gp || true }
 }
 
@@ -150,7 +151,7 @@ goto_repodir() {
   dir=$(fd -t d -H --max-depth $max_depth -g '.git' \
     --base-directory "$base_dir" --prune |
     sed 's:/\.git/*$::' |
-    fzf --height=36% --query "$query" --prompt="Git Repo: ")
+    fzf --no-multi --height=36% --query "$query" --prompt="Git Repo: ")
   [[ -n "$dir" ]] && cd "$base_dir/$dir"
 }
 
@@ -166,17 +167,17 @@ zp() { cd ${1:+$HOME/personal/code/}${1:-$HOME/personal} }
 sel-awsprofile() {
   if command -v aws &>/dev/null; then
     aws configure list-profiles 2>/dev/null | sort -u |
-      fzf --height=40% --prompt="AWS profile: "
+      fzf --no-multi --height=40% --prompt="AWS profile: "
   else
     grep -hE '^\[.+\]$' ${AWS_SHARED_CREDENTIALS_FILE:-$HOME/.aws/credentials} |
-      sed -E 's/^\[(.+)\]$/\1/' | sort -u | fzf --height=40% --prompt="AWS profile: "
+      sed -E 's/^\[(.+)\]$/\1/' | sort -u | fzf --no-multi --height=40% --prompt="AWS profile: "
   fi
 }
 
 # switch the active gh account
 ghs() {
   gh auth status --json 'hosts' --jq '.hosts."github.com".[].login' |
-    fzf --height=4 --query "$1" --prompt "Github user: " |
+    fzf --no-multi --height=4 --query "$1" --prompt "Github user: " |
     xargs -r -I {} gh auth switch -u {}
 }
 
@@ -188,7 +189,7 @@ kwhere() {
 
 kn() {
   local ns
-  ns=$(kubectl get ns -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | fzf \
+  ns=$(kubectl get ns -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | fzf --no-multi \
     --preview "kubectl describe ns {}" \
     --preview-window=right:78%:wrap \
     --height=18 \
@@ -198,7 +199,7 @@ kn() {
 
 kc() {
   local ctx
-  ctx=$(kubectl config get-contexts -o name | fzf \
+  ctx=$(kubectl config get-contexts -o name | fzf --no-multi \
     --height=9 \
     --prompt="Switch Context: ")
   [[ -n "$ctx" ]] && kubectl config use-context $ctx
