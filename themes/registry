@@ -13,7 +13,7 @@ config/fzf/colors-template.sh config/fzf/colors.sh -
 config/gum/colors-template.sh config/gum/colors.sh -
 config/claude/colors-template.sh config/claude/colors.sh -
 config/tmux/colors-template.conf config/tmux/colors.conf tmux source-file ~/.config/tmux/tmux.conf
-config/herdr/config-template.toml config/herdr/config.toml herdr server reload-config
+config/herdr/config-template.toml config/herdr/config.toml if herdr status server 2>/dev/null | grep -q '^status: running$'; then herdr server reload-config; fi
 config/nvim/lua/colors-template.lua config/nvim/lua/colors.lua pkill -USR1 -x nvim || true
 config/starship/config-template.toml config/starship/config.toml -
 config/lazygit/config-template.yml config/lazygit/config.yml -
