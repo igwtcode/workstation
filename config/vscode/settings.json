@@ -23,8 +23,10 @@
 	"editor.formatOnSave": true,
 	"terminal.integrated.fontFamily": "'Liga SFMono Nerd Font', 'GeistMono NF Medium', monospace",
 	"terminal.integrated.fontLigatures.enabled": false,
+	"terminal.integrated.fontWeight": "600",
 	"editor.fontFamily": "'Liga SFMono Nerd Font', 'GeistMono NF Medium', monospace",
 	"editor.fontLigatures": false,
+	"editor.fontWeight": "600",
 	"editor.fontSize": 15,
 	"editor.lineHeight": 1.5,
 	"task": {

@@ -22,6 +22,7 @@
 	// SF Mono is mac-only; linux lands on the fallbacks
 	"ui_font_family": "Liga SFMono Nerd Font",
 	"ui_font_fallbacks": ["GeistMono Nerd Font Propo"],
+	"ui_font_weight": 600,
 	"ui_font_features": {
 		"calt": false,
 		"liga": false
@@ -33,7 +34,7 @@
 		"calt": false,
 		"liga": false
 	},
-	// "buffer_font_weight": 300,
+	"buffer_font_weight": 600,
 	"terminal": {
 		"copy_on_select": true,
 		"line_height": {
@@ -44,8 +45,8 @@
 		"font_features": {
 			"calt": false,
 			"liga": false
-		}
-		// "font_weight": 300,
+		},
+		"font_weight": 600
 		// "font_size": 15,
 	},
 	"theme": {
