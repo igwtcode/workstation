@@ -109,6 +109,13 @@ install_list "$root/pkg/mac-cask.txt" --cask
 
 setup_rustup
 
+# tailscale-app's daemon needs its kernel/system extension approved once in
+# System Settings -> Privacy & Security before tailscaled comes up — a GUI
+# step bootstrap can't do for you.
+if ! pgrep -qx tailscaled; then
+  warn "tailscale: daemon not running yet — open Tailscale.app once and approve its system extension"
+fi
+
 "$root/os/mac/defaults.sh"
 
 log "bootstrap (mac): OS setup done"

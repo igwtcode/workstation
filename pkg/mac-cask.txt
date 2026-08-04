@@ -32,6 +32,9 @@ orbstack
 # launcher / productivity
 raycast
 
+# networking
+tailscale-app
+
 # communication
 microsoft-outlook
 microsoft-teams
