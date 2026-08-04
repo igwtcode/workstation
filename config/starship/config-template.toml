@@ -3,7 +3,6 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = """
-${env_var.WS_ZONE}\
 $directory\
 $git_branch\
 $git_status\
@@ -13,12 +12,6 @@ $character"""
 add_newline = false
 
 palette = "colors"
-
-# Which identity zone (~/work, ~/personal) the shell is in — set by the
-# zone's mise config, so it renders nothing outside every zone.
-[env_var.WS_ZONE]
-variable = "WS_ZONE"
-format = "[$env_value ](fg:warn)"
 
 [directory]
 format = "[$path ](fg:primary)"
@@ -46,7 +39,7 @@ vimcmd_visual_symbol = "[V](bold fg:muted)"
 
 [palettes.colors]
 primary = '{{accent}}'
-secondary = '{{color4}}'
+secondary = '{{color5}}'
 warn = '{{color3}}'
 danger = '{{color9}}'
 muted = '{{fg_dim}}'
