@@ -11,10 +11,10 @@ root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
 source "$root/lib/common.sh"
 # shellcheck source=lib/op.sh
 source "$root/lib/op.sh"
+# shellcheck source=lib/zone.sh
+source "$root/lib/zone.sh"
 
 [[ ${usage_yes:-false} == true ]] && export WS_YES=1
-
-doc_title=${usage_doc:-${WS_OP_ENVFILES_DOC:-workstation-envfiles.zip}}
 
 # The tree to work on. Archive entries are stored RELATIVE TO THIS DIRECTORY,
 # not to $HOME — so a tree saved from one layout restores into another
@@ -26,6 +26,21 @@ tree=${usage_dir:-${WS_CODE_ROOT:-}}
 tree=${tree/#\~/$HOME}
 tree=${tree%/}
 [[ $tree == /* ]] || die "directory must be an absolute path (got '$tree')"
+
+# Each zone's tree has its own env files, so each gets its own document.
+# The zone comes from the tree, not the ambient one: a --dir pointing at
+# another zone's tree must not read or overwrite this zone's document.
+zone=${WS_ZONE:-}
+if [[ -n ${WS_ZONES:-} ]]; then
+  while IFS= read -r zname; do
+    zroot=$(zone_root "$zname")
+    [[ $tree == "$zroot" || $tree == "$zroot"/* ]] && {
+      zone=$zname
+      break
+    }
+  done < <(zone_names)
+fi
+doc_title=${usage_doc:-${WS_OP_ENVFILES_DOC:-workstation-envfiles${zone:+-$zone}.zip}}
 
 mode=${usage_mode:-}
 [[ -n $mode ]] || mode=$(printf 'load\nsave\n' | pick "op:envfiles>")
@@ -52,9 +67,22 @@ case $mode in
     ;;
   load)
     require_cmd unzip
-    confirm "Restore .env files from '$doc_title' into ${tree/#$HOME/\~}? (existing files are overwritten)"
     op_ensure
+    if [[ -z $(op_doc_id "$doc_title") ]]; then
+      warn "no 1Password document '$doc_title' — env-file documents in scope:"
+      op_doc_list | grep -i envfiles >&2 || true
+      die "back this tree up first ('mise run op:envfiles save'), or pass --doc <title>"
+    fi
     op_doc_get "$doc_title" "$tmp/envfiles.zip"
+    # Entries are relative to whatever tree was saved. An archive rooted one
+    # level off still extracts cleanly, just into the wrong places — so show
+    # the resulting paths and confirm against those, not against the title.
+    unzip -Z1 "$tmp/envfiles.zip" | grep -v '/$' >"$tmp/entries" || true
+    [[ -s $tmp/entries ]] || die "'$doc_title' contains no files"
+    log "'$doc_title' holds $(wc -l <"$tmp/entries" | tr -d ' ') files; they will land as:"
+    sed "s|^|  ${tree/#$HOME/\~}/|" "$tmp/entries" | head -5
+    [[ $(wc -l <"$tmp/entries") -gt 5 ]] && log "  ... and $(($(wc -l <"$tmp/entries") - 5)) more"
+    confirm "Restore into ${tree/#$HOME/\~}? (existing files are overwritten)"
     mkdir -p "$tree"
     unzip -qo "$tmp/envfiles.zip" -d "$tree"
     log "restored env files from '$doc_title' into ${tree/#$HOME/\~}"
