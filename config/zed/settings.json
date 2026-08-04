@@ -48,8 +48,8 @@
 	},
 	"theme": {
 		"mode": "dark",
-		"light": "Tokyo Night Light",
-		"dark": "Tokyo Night"
+		"light": "Gruvbox Light Hard",
+		"dark": "Gruvbox Dark Hard"
 	},
 	"icon_theme": {
 		"mode": "dark",
@@ -58,10 +58,7 @@
 	},
 	"agent_servers": {
 		"claude-acp": {
-			"default_config_options": {
-    "effort": "high"
-   },
-   "type": "registry"
+			"type": "registry"
 		},
 		"opencode": {
 			"default_config_options": {

@@ -83,6 +83,6 @@
 	"[yaml]": {
 		"editor.defaultFormatter": "biomejs.biome"
 	},
-	"workbench.colorTheme": "Tokyo Night",
+	"workbench.colorTheme": "Gruvbox Dark Hard",
 	"terminal.integrated.defaultLocation": "editor"
 }
