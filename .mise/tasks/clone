@@ -16,12 +16,12 @@ source "$root/lib/zone.sh"
 all=${usage_all:-false}
 
 # This task runs from the repo, so it inherits the repo's zone; --zone
-# borrows another zone's gh/aws identity for the run.
+# borrows another zone's gh/aws identity for the run. Without it the zone is
+# derived from the forge destination below.
 if [[ -n ${usage_zone:-} ]]; then
   require_cmd jq mise
   zone_export "$usage_zone"
 fi
-log "clone: identity zone ${WS_ZONE:-none}"
 
 require_cmd git
 
@@ -46,8 +46,13 @@ if [[ -n $sel ]]; then
     [[ $sel == "$kind" || $sel == "$kind:$src" ]] && matches+=("$f")
   done
   [[ ${#matches[@]} -gt 0 ]] || die "no forge in WS_FORGES matches '$sel'"
-  [[ ${#matches[@]} -eq 1 ]] || die "'$sel' is ambiguous — use kind:source"
-  forge=${matches[0]}
+  if [[ ${#matches[@]} -eq 1 ]]; then
+    forge=${matches[0]}
+  else
+    # a bare kind ("github") narrows rather than resolves — pick among its lines
+    forge=$(printf '%s\n' "${matches[@]}" | pick "forge ($sel)>")
+    [[ -n $forge ]] || die "nothing selected"
+  fi
 elif [[ ${#forges[@]} -eq 1 ]]; then
   forge=${forges[0]}
 else
@@ -61,6 +66,23 @@ IFS='|' read -r kind src dest extra <<<"$forge"
 [[ -z ${extra:-} ]] ||
   die "forge line '$forge' has leftover identity fields — commit identity now comes from the zone gitconfig (mise run identity); trim the line to kind|source|dest"
 dest=${dest/#\~/$HOME}
+
+# Cloning into another zone's tree needs that zone's identity: the repo sits
+# in one zone, so a work forge listed from the personal zone asks gh with the
+# wrong account and 404s on private repos. Derive it from dest; --zone wins.
+if [[ -z ${usage_zone:-} ]]; then
+  while IFS= read -r zname; do
+    zroot=$(zone_root "$zname")
+    [[ $dest == "$zroot" || $dest == "$zroot"/* ]] || continue
+    if [[ $zname != "${WS_ZONE:-}" ]]; then
+      require_cmd jq mise
+      zone_export "$zname"
+      log "clone: destination is under $(zone_tilde "$zroot") — borrowing the '$zname' identity"
+    fi
+    break
+  done < <(zone_names)
+fi
+log "clone: identity zone ${WS_ZONE:-none}"
 
 # validate kind + tooling here, not in list_repos — a die inside the
 # process substitution below cannot stop the script
