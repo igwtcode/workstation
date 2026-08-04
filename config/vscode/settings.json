@@ -23,11 +23,11 @@
 	"editor.formatOnSave": true,
 	"terminal.integrated.fontFamily": "'Liga SFMono Nerd Font', 'GeistMono NF Medium', monospace",
 	"terminal.integrated.fontLigatures.enabled": false,
-	"terminal.integrated.fontWeight": "600",
+	"terminal.integrated.fontWeight": "500",
 	"editor.fontFamily": "'Liga SFMono Nerd Font', 'GeistMono NF Medium', monospace",
 	"editor.fontLigatures": false,
-	"editor.fontWeight": "600",
-	"editor.fontSize": 15,
+	"editor.fontWeight": "400",
+	"editor.fontSize": 14,
 	"editor.lineHeight": 1.5,
 	"task": {
 		"path": "/usr/bin/go-task"
@@ -35,7 +35,7 @@
 	"aws.cloudformation.telemetry.enabled": false,
 	"editor.minimap.enabled": false,
 	"shellformat.useEditorConfig": true,
-	"window.zoomLevel": 2,
+	"window.zoomLevel": 1,
 	"workbench.startupEditor": "none",
 	"security.workspace.trust.untrustedFiles": "open",
 	"git.autoRepositoryDetection": "openEditors",
@@ -83,6 +83,6 @@
 	"[yaml]": {
 		"editor.defaultFormatter": "biomejs.biome"
 	},
-	"workbench.colorTheme": "Catppuccin Mocha",
+	"workbench.colorTheme": "Tokyo Night",
 	"terminal.integrated.defaultLocation": "editor"
 }

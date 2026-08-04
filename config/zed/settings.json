@@ -11,30 +11,27 @@
 	"base_keymap": "VSCode",
 	"cursor_blink": false,
 	"cursor_shape": "block",
-	"scrollbar": {
-		"show": "never"
-	},
 	"buffer_line_height": {
-		"custom": 1.7
+		"custom": 1.6
 	},
 	"relative_line_numbers": "enabled",
-	"ui_font_size": 17.0,
+	"ui_font_size": 15.0,
 	// SF Mono is mac-only; linux lands on the fallbacks
 	"ui_font_family": "Liga SFMono Nerd Font",
 	"ui_font_fallbacks": ["GeistMono Nerd Font Propo"],
-	"ui_font_weight": 600,
+	"ui_font_weight": 400,
 	"ui_font_features": {
 		"calt": false,
 		"liga": false
 	},
-	// "buffer_font_size": 16.0,
+	"buffer_font_size": 15.0,
 	"buffer_font_family": "Liga SFMono Nerd Font",
 	"buffer_font_fallbacks": ["GeistMono Nerd Font Mono"],
 	"buffer_font_features": {
 		"calt": false,
 		"liga": false
 	},
-	"buffer_font_weight": 600,
+	"buffer_font_weight": 400,
 	"terminal": {
 		"copy_on_select": true,
 		"line_height": {
@@ -46,13 +43,13 @@
 			"calt": false,
 			"liga": false
 		},
-		"font_weight": 600
+		"font_weight": 500
 		// "font_size": 15,
 	},
 	"theme": {
 		"mode": "dark",
-		"light": "Noctalia Light",
-		"dark": "Gruvbox Dark Hard"
+		"light": "Tokyo Night Light",
+		"dark": "Tokyo Night"
 	},
 	"icon_theme": {
 		"mode": "dark",
@@ -61,7 +58,10 @@
 	},
 	"agent_servers": {
 		"claude-acp": {
-			"type": "registry"
+			"default_config_options": {
+    "effort": "high"
+   },
+   "type": "registry"
 		},
 		"opencode": {
 			"default_config_options": {
