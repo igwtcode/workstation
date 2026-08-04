@@ -42,6 +42,14 @@ _install_tpm() {
   "$dir/bin/install_plugins"
 }
 
+# Some tools hardcode ~/.aws/credentials and ignore the per-zone
+# AWS_SHARED_CREDENTIALS_FILE. Point the default at one zone's file so they
+# resolve; relative target so it survives the tree moving. Only ever created
+# when nothing is there — an existing file or link is left alone.
+_link_default_aws_credentials() {
+  ln -sfn "${WS_AWS_DEFAULT_ZONE}-credentials" "$HOME/.aws/credentials"
+}
+
 post_sync_hooks() {
   if ws_has bat; then
     hook "rebuild bat cache" _bat_cache
@@ -49,6 +57,14 @@ post_sync_hooks() {
 
   if ws_has git && [[ -d $HOME/.config/tmux && ! -d $HOME/.config/tmux/plugins/tpm ]]; then
     hook "install tmux plugin manager (tpm)" _install_tpm
+  fi
+
+  # the zone name lands in a path, so hold it to the same shape zone.sh does
+  local aws_default=$HOME/.aws/credentials aws_zone=${WS_AWS_DEFAULT_ZONE:-}
+  if [[ -n $aws_zone && $aws_zone != */* && $aws_zone != .* &&
+    ! -e $aws_default && ! -L $aws_default &&
+    -f $HOME/.aws/$aws_zone-credentials ]]; then
+    hook "link ~/.aws/credentials -> ${WS_AWS_DEFAULT_ZONE}-credentials" _link_default_aws_credentials
   fi
 }
 
