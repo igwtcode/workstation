@@ -15,6 +15,9 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 # brew's bin ($HOME/.cargo/bin proxies come from core.zsh)
 export PATH=$PATH:$HOMEBREW_PREFIX/opt/rustup/bin
 
+# util-linux is keg-only; appended so it can't shadow mac's cal/column/getopt
+export PATH=$PATH:$HOMEBREW_PREFIX/opt/util-linux/bin:$HOMEBREW_PREFIX/opt/util-linux/sbin
+
 # Android SDK (Expo/React Native), installed via Android Studio's SDK Manager
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools

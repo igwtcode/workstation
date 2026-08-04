@@ -33,6 +33,7 @@ superfile
 tldr
 tokei
 tree
+util-linux
 watch
 wget
 yq
