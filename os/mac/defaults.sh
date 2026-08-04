@@ -21,6 +21,11 @@ defaults write NSGlobalDomain InitialKeyRepeat -int 15
 # ApplePressAndHoldEnabled is deliberately left at its default (true): the
 # press-and-hold accent popup is how non-English characters get typed, and
 # the fast repeat rate above already covers the reason people disable it.
+# VS Code is Electron and reads ApplePressAndHoldEnabled under its own
+# bundle id rather than honoring the system key-repeat rate above, so held
+# keys show the accent popup instead of repeating — scope the override to
+# VS Code alone rather than flipping the global default set above.
+defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 # no auto-capitalization, smart quotes/dashes, period on double-space, or
 # spell-correct — they fight code and terminals
 defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
