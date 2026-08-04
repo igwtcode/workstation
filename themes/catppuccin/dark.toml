@@ -3,7 +3,9 @@
 # https://github.com/catppuccin/palette/blob/main/palette.json
 # https://github.com/catppuccin/kitty/blob/main/themes/mocha.conf
 # bg_alt = mantle; fg_dim = overlay2; border = overlay0; accent = mauve;
-# selection/cursor = rosewater (the kitty port's choice)
+# cursor = rosewater (the kitty port's choice). Selection is surface1/text,
+# not the port's rosewater: selection_bg also backs UI row highlights (fzf,
+# nvim, lazygit), and an accent-bright bar leaves the fg unreadable.
 
 name = "catppuccin-dark"
 mode = "dark"
@@ -13,8 +15,8 @@ bg_alt = "#181825"
 fg = "#cdd6f4"
 fg_dim = "#9399b2"
 accent = "#cba6f7"
-selection_bg = "#f5e0dc"
-selection_fg = "#1e1e2e"
+selection_bg = "#45475a"
+selection_fg = "#cdd6f4"
 cursor = "#f5e0dc"
 border = "#6c7086"
 

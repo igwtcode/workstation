@@ -3,7 +3,9 @@
 # https://github.com/catppuccin/palette/blob/main/palette.json
 # https://github.com/catppuccin/kitty/blob/main/themes/latte.conf
 # bg_alt = mantle; fg_dim = overlay2; border = overlay0; accent = mauve;
-# selection/cursor = rosewater (the kitty port's choice)
+# cursor = flamingo (the kitty port's choice). Selection is surface0/text,
+# not the port's flamingo: selection_bg also backs UI row highlights (fzf,
+# nvim, lazygit), and an accent-bright bar leaves the fg unreadable.
 
 name = "catppuccin-light"
 mode = "light"
@@ -13,8 +15,8 @@ bg_alt = "#e6e9ef"
 fg = "#4c4f69"
 fg_dim = "#7c7f93"
 accent = "#8839ef"
-selection_bg = "#dc8a78"
-selection_fg = "#eff1f5"
+selection_bg = "#ccd0da"
+selection_fg = "#4c4f69"
 cursor = "#dc8a78"
 border = "#9ca0b0"
 
