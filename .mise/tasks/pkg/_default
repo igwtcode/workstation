@@ -38,12 +38,59 @@ step() {
 
 # --- mac --------------------------------------------------------------------
 
+# list_new <file> <installed-cmd...> — pkg-list entries not yet installed
+list_new() {
+  local file=$1
+  shift
+  comm -23 \
+    <(grep -vE '^[[:space:]]*(#|$)' "$file" | sort) \
+    <("$@" | sort)
+}
+
 check_mac() {
   brew update
   styled 4 "==> outdated formulae"
   brew outdated --formula --verbose || true
   styled 4 "==> outdated casks"
   brew outdated --cask --verbose --greedy || true
+  local new
+  new=$(list_new "$root/pkg/mac-brew.txt" brew list --formula --full-name)
+  new+=$'\n'$(list_new "$root/pkg/mac-cask.txt" brew list --cask --full-name)
+  new=$(sed '/^$/d' <<<"$new")
+  [[ -n $new ]] && styled 4 "==> in pkg lists but not installed" && printf '%s\n' "$new"
+  return 0
+}
+
+# same tap-trust + idempotent-install pattern as os/mac/bootstrap.sh (kept in
+# sync by hand) — `brew install` is a no-op for anything already current, so
+# this only actually installs entries added to the list since the last run.
+trust_new_taps() {
+  local file=$1 pkg tap
+  while IFS= read -r pkg; do
+    tap=${pkg%/*}
+    brew tap "$tap"
+    brew trust --formula "$pkg" ||
+      warn "brew trust failed for '$pkg' — install will refuse it until trusted"
+  done < <(grep -E '^[^#[:space:]]+/[^/]+/[^/]+$' "$file" || true)
+}
+
+install_from_list() {
+  local file=$1 kind=formulae
+  shift
+  local -a pkgs=()
+  local pkg
+  while IFS= read -r pkg; do
+    pkgs+=("$pkg")
+  done < <(grep -vE '^[[:space:]]*(#|$)' "$file")
+  [[ $* == *--cask* ]] && kind=casks
+  log "packages: syncing ${#pkgs[@]} $kind from ${file##*/}"
+  brew install "$@" "${pkgs[@]}"
+}
+
+install_new_mac() {
+  trust_new_taps "$root/pkg/mac-brew.txt"
+  install_from_list "$root/pkg/mac-brew.txt"
+  install_from_list "$root/pkg/mac-cask.txt" --cask
 }
 
 update_mac() {
@@ -53,6 +100,7 @@ update_mac() {
   # and confirmed, which is the point of running this interactively.
   [[ ${WS_YES:-0} == 1 ]] && export HOMEBREW_NO_ASK=1
   step "brew: refresh package metadata" brew update
+  step "brew: install new entries from pkg lists" install_new_mac
   local args=(upgrade) desc="brew: upgrade formulae + casks"
   if [[ $all == true ]]; then
     args+=(--greedy)
@@ -73,12 +121,24 @@ check_arch() {
   sudo pacman -Sy
   styled 4 "==> outdated packages"
   paru -Qu || true
+  local new
+  new=$(list_new "$root/pkg/arch.txt" paru -Qq)
+  [[ -n $new ]] && styled 4 "==> in pkg/arch.txt but not installed" && printf '%s\n' "$new"
+  return 0
+}
+
+install_new_arch() {
+  local pkgs=(-S --needed)
+  [[ ${WS_YES:-0} == 1 ]] && pkgs+=(--noconfirm)
+  mapfile -t -O "${#pkgs[@]}" pkgs < <(grep -vE '^[[:space:]]*(#|$)' "$root/pkg/arch.txt")
+  paru "${pkgs[@]}"
 }
 
 update_arch() {
   local args=(-Syu)
   [[ ${WS_YES:-0} == 1 ]] && args+=(--noconfirm)
   step "pacman cache: clear partial downloads" sudo rm -f /var/cache/pacman/pkg/download-*
+  step "paru: install new entries from pkg/arch.txt" install_new_arch
   step "paru: full system upgrade (repo + AUR)" paru "${args[@]}"
   if ws_has paccache; then
     step "paccache: keep 2 recent versions of installed packages" sudo paccache -rk2
