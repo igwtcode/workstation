@@ -47,17 +47,34 @@ list_new() {
     <("$@" | sort)
 }
 
+# list_extra <file> <installed-cmd...> — installed but no longer in the list.
+# Report-only: nothing here uninstalls anything, removing a pkg-list entry
+# is always a manual `brew uninstall`/`paru -R` afterwards.
+list_extra() {
+  local file=$1
+  shift
+  comm -13 \
+    <(grep -vE '^[[:space:]]*(#|$)' "$file" | sort) \
+    <("$@" | sort)
+}
+
 check_mac() {
   brew update
   styled 4 "==> outdated formulae"
   brew outdated --formula --verbose || true
   styled 4 "==> outdated casks"
   brew outdated --cask --verbose --greedy || true
-  local new
+  local new extra
   new=$(list_new "$root/pkg/mac-brew.txt" brew list --formula --full-name)
   new+=$'\n'$(list_new "$root/pkg/mac-cask.txt" brew list --cask --full-name)
   new=$(sed '/^$/d' <<<"$new")
   [[ -n $new ]] && styled 4 "==> in pkg lists but not installed" && printf '%s\n' "$new"
+  # --installed-on-request excludes dependencies pulled in by other formulae,
+  # which would otherwise flood this with things nobody asked to remove
+  extra=$(list_extra "$root/pkg/mac-brew.txt" brew list --formula --installed-on-request --full-name)
+  extra+=$'\n'$(list_extra "$root/pkg/mac-cask.txt" brew list --cask --full-name)
+  extra=$(sed '/^$/d' <<<"$extra")
+  [[ -n $extra ]] && styled 4 "==> installed but not in pkg lists (remove manually if unwanted)" && printf '%s\n' "$extra"
   return 0
 }
 
@@ -121,9 +138,13 @@ check_arch() {
   sudo pacman -Sy
   styled 4 "==> outdated packages"
   paru -Qu || true
-  local new
+  local new extra
   new=$(list_new "$root/pkg/arch.txt" paru -Qq)
   [[ -n $new ]] && styled 4 "==> in pkg/arch.txt but not installed" && printf '%s\n' "$new"
+  # -Qeq: explicitly installed, excludes dependencies pulled in by other
+  # packages — otherwise this would flood with things nobody asked to remove
+  extra=$(list_extra "$root/pkg/arch.txt" paru -Qeq)
+  [[ -n $extra ]] && styled 4 "==> installed but not in pkg/arch.txt (remove manually if unwanted)" && printf '%s\n' "$extra"
   return 0
 }
 
