@@ -22,6 +22,5 @@ config/git/config-template config/git/config -
 config/bat/themes/colors-template.tmTheme config/bat/themes/colors.tmTheme bat cache --build
 config/k9s/skins/colors-template.yaml config/k9s/skins/colors.yaml -
 config/superfile/theme/colors-template.toml config/superfile/theme/colors.toml -
-config/alacritty/themes/colors-template.toml config/alacritty/themes/colors.toml -
 config/ghostty/themes/colors-template config/ghostty/themes/colors -
 config/kitty/themes/colors-template.conf config/kitty/themes/colors.conf pkill -USR1 -x kitty || true

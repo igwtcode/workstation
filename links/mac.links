@@ -1,9 +1,6 @@
 # mac layer, applied after common. Format: see common.links.
 
 # terminal emulators
-config/alacritty/mac.toml ~/.config/alacritty/alacritty.toml
-config/alacritty/shared.toml ~/.config/alacritty/shared.toml
-config/alacritty/themes ~/.config/alacritty/themes
 config/ghostty/config ~/.config/ghostty/config
 config/ghostty/mac.conf ~/.config/ghostty/os.conf
 config/ghostty/themes ~/.config/ghostty/themes
