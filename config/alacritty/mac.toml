@@ -14,3 +14,7 @@ option_as_alt = "Both"
 
 [font]
 size = 18
+normal = { family = "Liga SFMono Nerd Font", style = "Regular" }
+bold = { family = "Liga SFMono Nerd Font", style = "Bold" }
+italic = { family = "Liga SFMono Nerd Font", style = "Italic" }
+bold_italic = { family = "Liga SFMono Nerd Font", style = "Bold Italic" }

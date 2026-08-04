@@ -21,8 +21,10 @@
 		"editor.defaultFormatter": "ms-azuretools.vscode-docker"
 	},
 	"editor.formatOnSave": true,
-	"terminal.integrated.fontFamily": "GeistMono NF Medium",
-	"editor.fontFamily": "GeistMono NF Medium",
+	"terminal.integrated.fontFamily": "'Liga SFMono Nerd Font', 'GeistMono NF Medium', monospace",
+	"terminal.integrated.fontLigatures.enabled": false,
+	"editor.fontFamily": "'Liga SFMono Nerd Font', 'GeistMono NF Medium', monospace",
+	"editor.fontLigatures": false,
 	"editor.fontSize": 15,
 	"editor.lineHeight": 1.5,
 	"task": {

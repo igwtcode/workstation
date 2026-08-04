@@ -43,3 +43,4 @@ font-caskaydia-mono-nerd-font
 font-geist-mono-nerd-font
 font-jetbrains-mono-nerd-font
 font-meslo-lg-nerd-font
+font-sf-mono-nerd-font-ligaturized

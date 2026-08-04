@@ -19,16 +19,32 @@
 	},
 	"relative_line_numbers": "enabled",
 	"ui_font_size": 17.0,
-	"ui_font_family": "GeistMono Nerd Font Propo",
+	// SF Mono is mac-only; linux lands on the fallbacks
+	"ui_font_family": "Liga SFMono Nerd Font",
+	"ui_font_fallbacks": ["GeistMono Nerd Font Propo"],
+	"ui_font_features": {
+		"calt": false,
+		"liga": false
+	},
 	// "buffer_font_size": 16.0,
-	// "buffer_font_family": "GeistMono Nerd Font Mono",
+	"buffer_font_family": "Liga SFMono Nerd Font",
+	"buffer_font_fallbacks": ["GeistMono Nerd Font Mono"],
+	"buffer_font_features": {
+		"calt": false,
+		"liga": false
+	},
 	// "buffer_font_weight": 300,
 	"terminal": {
 		"copy_on_select": true,
 		"line_height": {
 			"custom": 1.6
+		},
+		"font_family": "Liga SFMono Nerd Font",
+		"font_fallbacks": ["GeistMono Nerd Font Mono"],
+		"font_features": {
+			"calt": false,
+			"liga": false
 		}
-		// "font_family": "GeistMono Nerd Font Mono",
 		// "font_weight": 300,
 		// "font_size": 15,
 	},
