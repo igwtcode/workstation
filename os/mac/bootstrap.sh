@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# macOS bootstrap: Xcode CLT, Homebrew, pkg lists, rustup, system defaults.
+# macOS bootstrap: Xcode CLT + developer dir, Homebrew, pkg lists, rustup,
+# system defaults.
 # Machine-mutating; run via `mise run bootstrap`. Re-runnable.
 set -euo pipefail
 
@@ -43,6 +44,25 @@ ensure_clt() {
     sleep 5
   done
   log "xcode clt: installed"
+}
+
+# Installing the CLT points the active developer dir at itself, and a later
+# Xcode.app install does not take it over — leaving xcodebuild and simctl
+# unavailable even with Xcode and simulators installed.
+ensure_xcode_dir() {
+  local dev=/Applications/Xcode.app/Contents/Developer
+  if [[ ! -d $dev ]]; then
+    warn "xcode: Xcode.app not installed — no xcodebuild/simctl (install from the App Store)"
+    return 0
+  fi
+  if [[ $(xcode-select -p 2>/dev/null) == "$dev" ]]; then
+    log "xcode: active developer dir is Xcode.app"
+    return 0
+  fi
+  log "xcode: switching active developer dir to Xcode.app"
+  sudo xcode-select -s "$dev"
+  sudo xcodebuild -license accept
+  sudo xcodebuild -runFirstLaunch
 }
 
 ensure_brew() {
@@ -100,6 +120,7 @@ setup_rustup() {
 }
 
 ensure_clt
+ensure_xcode_dir
 ensure_brew
 
 brew update
