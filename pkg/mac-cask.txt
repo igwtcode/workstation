@@ -26,6 +26,10 @@ opencode-desktop
 # dev environments
 devpod
 
+# mobile dev (expo/react native on android)
+android-studio
+zulu@17
+
 # containers
 orbstack
 
