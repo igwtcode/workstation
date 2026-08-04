@@ -35,7 +35,7 @@ gui:
     optionsTextColor:
       - "{{color4}}"
     selectedLineBgColor:
-      - "{{bg_alt}}"
+      - "{{selection_bg}}"
     cherryPickedCommitBgColor:
       - "{{selection_bg}}"
     cherryPickedCommitFgColor:
