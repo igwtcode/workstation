@@ -146,32 +146,80 @@ gc() {
   echo "$files" | xargs git add && git commit -m "$msg"
 }
 
-goto_repodir() {
-  local base_dir="$1" query="$2" max_depth=4 dir
-  dir=$(fd -t d -H --max-depth $max_depth -g '.git' \
-    --base-directory "$base_dir" --prune |
-    sed 's:/\.git/*$::' |
-    fzf --no-multi --height=36% --query "$query" --prompt="Git Repo: ")
-  [[ -n "$dir" ]] && cd "$base_dir/$dir"
+# --- identity zones -------------------------------------------------------
+#
+# Zones are read from the ~/<zone>/mise.toml files `mise run identity` seeds
+# rather than hardcoded, so adding a zone needs no change here. Those values
+# are mise templates, hence the {{env.HOME}} expansion.
+
+_ws_zone_get() {
+  sed -n "s|^[[:space:]]*$2[[:space:]]*=[[:space:]]*\"\(.*\)\"[[:space:]]*\$|\1|p" "$1" 2>/dev/null |
+    head -1 | sed "s|{{env.HOME}}|$HOME|g"
 }
 
-# repo picker over the active zone's code root (~/work/code, ~/personal/code)
-gg() { goto_repodir $WS_CODE_ROOT "$1" }
+# "<zone>\t<zone mise.toml>" per zone, the active zone first
+ws_zones() {
+  local f zone
+  local -a first=() rest=()
+  for f in $HOME/*/mise.toml(N); do
+    zone=$(_ws_zone_get "$f" WS_ZONE)
+    [[ -n $zone ]] || continue
+    if [[ $zone == "${WS_ZONE:-}" ]]; then first+=("$zone	$f"); else rest+=("$zone	$f"); fi
+  done
+  print -l -- "${first[@]}" "${rest[@]}"
+}
+
+_ws_repos_in() {
+  fd -t d -H --max-depth 4 -g '.git' --base-directory "$1" --prune 2>/dev/null |
+    sed 's:/\.git/*$::'
+}
+
+# goto_repodir [base_dir] [query] — fzf over git repos, cd into the pick.
+# An empty base_dir spans every zone's code root, so repos stay reachable
+# from outside a zone and from the other one.
+goto_repodir() {
+  local base="$1" query="$2" zone f root rel choice
+  local -a repos=()
+  if [[ -n $base ]]; then
+    while IFS= read -r rel; do repos+=("$base/$rel"); done < <(_ws_repos_in "$base")
+  else
+    while IFS=$'\t' read -r zone f; do
+      root=$(_ws_zone_get "$f" WS_CODE_ROOT)
+      [[ -n $root && -d $root ]] || continue
+      while IFS= read -r rel; do repos+=("$root/$rel"); done < <(_ws_repos_in "$root")
+    done < <(ws_zones)
+  fi
+  (( ${#repos} )) || { print -ru2 "goto_repodir: no git repos found"; return 1 }
+  choice=$(print -l -- "${repos[@]}" | sed "s|^$HOME/|~/|" |
+    fzf --no-multi --height=36% --query "$query" --prompt="Git repo: ")
+  [[ -n $choice ]] && cd "${choice/#\~/$HOME}"
+}
+
+# repo picker across every zone; cd'ing in switches identity via mise
+gg() { goto_repodir "" "$1" }
 
 # jump into a zone; identity (git/gh/aws/claude) follows via mise
 zw() { cd ${1:+$HOME/work/code/}${1:-$HOME/work} }
 zp() { cd ${1:+$HOME/personal/code/}${1:-$HOME/personal} }
 
-# pick an AWS profile from the *active zone's* files (the env vars the zone
-# sets are what `aws configure list-profiles` reads)
+# Pick an AWS profile from *every* zone's files, active zone first, so a
+# work profile is reachable from the personal zone. The zone column is only
+# there to pick and filter by; the bare profile name is what gets printed.
 sel-awsprofile() {
-  if command -v aws &>/dev/null; then
-    aws configure list-profiles 2>/dev/null | sort -u |
-      fzf --no-multi --height=40% --prompt="AWS profile: "
-  else
-    grep -hE '^\[.+\]$' ${AWS_SHARED_CREDENTIALS_FILE:-$HOME/.aws/credentials} |
-      sed -E 's/^\[(.+)\]$/\1/' | sort -u | fzf --no-multi --height=40% --prompt="AWS profile: "
-  fi
+  local zone f cfg cred
+  {
+    while IFS=$'\t' read -r zone f; do
+      cfg=$(_ws_zone_get "$f" AWS_CONFIG_FILE)
+      cred=$(_ws_zone_get "$f" AWS_SHARED_CREDENTIALS_FILE)
+      if command -v aws &>/dev/null; then
+        AWS_CONFIG_FILE=$cfg AWS_SHARED_CREDENTIALS_FILE=$cred \
+          aws configure list-profiles 2>/dev/null
+      else
+        grep -hE '^\[.+\]$' "$cred" "$cfg" 2>/dev/null |
+          sed -E 's/^\[(profile )?(.+)\]$/\2/'
+      fi | sort -u | sed "s|^|$zone\t|"
+    done < <(ws_zones)
+  } | fzf --no-multi --height=40% --query "$1" --prompt="AWS profile: " | cut -f2
 }
 
 # switch the active gh account
