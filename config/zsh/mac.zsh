@@ -24,3 +24,7 @@ export PATH=$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools
 
 # clipboard helper used by core aliases
 clipcopy() { pbcopy "$@" }
+
+# keep the machine awake while agents run (display still sleeps)
+claude() { caffeinate -i command claude "$@" }
+opencode() { caffeinate -i command opencode "$@" }
