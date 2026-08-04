@@ -52,9 +52,6 @@ export STARSHIP_CONFIG=$XDG_CONFIG_HOME/starship/config.toml
 export TF_PLUGIN_CACHE_DIR=$XDG_CACHE_HOME/terraform-plugins
 export SAM_CLI_TELEMETRY=0
 export TANSTACK_CLI_TELEMETRY_DISABLED=1
-# This file's own path, resolved through the symlink, is the repo root — so
-# repo tasks stay runnable from anywhere without hardcoding a location.
-export WS_REPO=${${(%):-%N}:A:h:h:h}
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin
 
@@ -79,11 +76,9 @@ alias ..='cd ..'
 alias b=bat
 alias c=clear
 alias cp-awsprofile=' sel-awsprofile | tr -d "\n" | clipcopy'
-alias ccclone='mise -C $WS_REPO run clone codecommit'
 alias cr='cargo run -- '
 alias crq='cargo run -q -- '
 alias gd='git diff'
-alias ghclone='mise -C $WS_REPO run clone github'
 alias gl="git log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) %C(dim white)%<(16)%an%C(reset) %C(bold green)%<(14)%ar%C(reset) %C(white)%s%C(reset)%C(auto)%d%C(reset)' --all"
 alias gp='git pull --all --prune'
 alias hist='history -E'
