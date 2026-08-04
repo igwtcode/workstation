@@ -18,8 +18,9 @@ visual-studio-code
 zed
 
 # ai tools
+# @latest = rolling channel; the bare claude-code cask lags behind
 claude
-claude-code
+claude-code@latest
 codex
 codex-app
 opencode-desktop
@@ -34,6 +35,7 @@ orbstack
 raycast
 
 # communication
+microsoft-outlook
 microsoft-teams
 telegram
 
