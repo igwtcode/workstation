@@ -35,6 +35,7 @@ orbstack
 
 # launcher / productivity
 raycast
+superwhisper
 
 # networking
 tailscale-app
