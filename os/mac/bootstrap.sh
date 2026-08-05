@@ -80,15 +80,17 @@ ensure_brew() {
 # the budget.
 export HOMEBREW_NO_ASK=1
 
-# trust_qualified <file> — tap + trust owner/tap/name entries; Homebrew 6
-# will not evaluate an untrusted third-party formula. Re-running is safe.
+# trust_qualified <file> [--cask] — tap + trust owner/tap/name entries;
+# Homebrew 6 will not evaluate an untrusted third-party formula or cask.
+# Re-running is safe.
 trust_qualified() {
-  local file=$1 pkg tap
+  local file=$1 kind=--formula pkg tap
+  [[ ${2:-} == --cask ]] && kind=--cask
   while IFS= read -r pkg; do
     tap=${pkg%/*}
     log "tap trust: $pkg"
     brew tap "$tap"
-    brew trust --formula "$pkg" ||
+    brew trust "$kind" "$pkg" ||
       warn "brew trust failed for '$pkg' — 'brew install' will refuse it until trusted"
   done < <(grep -E '^[^#[:space:]]+/[^/]+/[^/]+$' "$file" || true)
 }
@@ -126,6 +128,7 @@ ensure_brew
 brew update
 trust_qualified "$root/pkg/mac-brew.txt"
 install_list "$root/pkg/mac-brew.txt"
+trust_qualified "$root/pkg/mac-cask.txt" --cask
 install_list "$root/pkg/mac-cask.txt" --cask
 
 setup_rustup
