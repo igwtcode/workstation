@@ -40,9 +40,6 @@ yq
 yt-dlp
 zoxide
 
-# networking
-tailscale
-
 # git & version control
 gh
 git
