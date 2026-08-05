@@ -21,6 +21,7 @@ zed
 claude
 claude-code@latest
 codex
+steipete/tap/codexbar
 
 # dev environments
 devpod
