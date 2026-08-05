@@ -246,7 +246,6 @@ claude-code
 claude-desktop
 openai-codex
 opencode
-opencode-desktop-bin
 
 # devops & infra
 ansible

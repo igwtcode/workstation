@@ -21,7 +21,6 @@ zed
 claude
 claude-code@latest
 codex
-opencode-desktop
 
 # dev environments
 devpod
