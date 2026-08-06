@@ -54,6 +54,9 @@ config/<app>/  dotfiles             themes/    palettes
 - Tasks are thin; first lines are shebang + `#MISE description=`.
 - Package lists: one per line, `#` section headers, alphabetical.
 - Conventional commits, one concern each.
+- Comments: almost never. One short line, only for what the code cannot
+  say — a trap, a why. No narration, no restating the obvious, no headers
+  explaining a file's history or reasoning.
 
 ## Adding a tool
 
