@@ -26,6 +26,10 @@ config/nvim/lazy-lock.json.bak
 config/tmux/plugins/
 config/gh/hosts*
 config/gh/state*
+config/herdr/.plugins.lock
+config/herdr/*.log
+config/herdr/*.sock
+config/herdr/session.json
 config/k9s/clusters/
 config/lazygit/state.yml
 config/btop/btop.log

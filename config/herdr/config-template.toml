@@ -1,71 +1,43 @@
-# herdr — agent multiplexer, configured to feel like this repo's tmux.
-#
-# Rendered to config.toml by `mise run theme` (plain token substitution, no
-# logic — and no stray double braces, the renderer dies on an unknown one).
-# Edit THIS file, never config.toml — that one is generated and
-# gitignored. Keys verified against herdr's config reference
-# (website/src/data/config-reference.json); defaults that already match tmux
-# are left out rather than restated.
-#
-# tmux parity is the rule: where herdr's default differs from
-# config/tmux/tmux.conf, the tmux key is added as an alternate (herdr accepts
-# an array per action) or takes over outright. Actions tmux has no equivalent
-# for (workspaces, agents, worktrees) keep herdr's defaults.
+# Rendered to config.toml by `mise run theme`. Edit this file, not that one.
+# Keys mirror config/tmux/tmux.conf; herdr accepts an array per action.
 
 [keys]
-# tmux: `set -g prefix C-a`
 prefix = "ctrl+a"
 
 # --- tabs (tmux windows) -----------------------------------------------------
-# tmux: M-n / M-p / M-c are bound without the prefix; keep both paths.
 new_tab = ["prefix+c", "alt+c"]
 next_tab = ["prefix+n", "alt+n"]
 previous_tab = ["prefix+p", "alt+p"]
-# tmux: prefix+, renames a window, prefix+& kills it
 rename_tab = ["prefix+shift+t", "prefix+comma"]
 close_tab = ["prefix+shift+x", "prefix+ampersand"]
 
 # --- panes -------------------------------------------------------------------
-# tmux: C-h/j/k/l select panes directly (vim-tmux-navigator)
 focus_pane_left = ["prefix+h", "ctrl+h"]
 focus_pane_down = ["prefix+j", "ctrl+j"]
 focus_pane_up = ["prefix+k", "ctrl+k"]
 focus_pane_right = ["prefix+l", "ctrl+l"]
-# tmux: % splits side by side, " splits stacked
 split_vertical = ["prefix+v", "prefix+percent"]
 split_horizontal = ["prefix+minus", "prefix+double_quote"]
-# tmux: M-z toggles zoom without the prefix
 zoom = ["prefix+z", "alt+z"]
-# tmux: prefix+; jumps to the last pane
 last_pane = "prefix+semicolon"
 
 # --- session -----------------------------------------------------------------
-# tmux: prefix+r reloads the config and prefix+d detaches. herdr ships those
-# two the other way round (prefix+r = resize mode, prefix+q = detach), so swap
-# them back and keep herdr's key as the alternate.
-reload_config = ["prefix+r", "prefix+shift+r"]
+# reload and resize swap herdr's keys; one key on two actions disables one
+reload_config = "prefix+r"
 resize_mode = "prefix+shift+r"
 detach = ["prefix+d", "prefix+q"]
-# tmux: prefix+o opens the sessionx picker
 workspace_picker = ["prefix+w", "prefix+o"]
 
 [terminal]
-# default_shell is deliberately unset: empty means $SHELL, which resolves to
-# brew's zsh on mac and /usr/bin/zsh on arch. tmux's hardcoded
-# `default-shell /bin/zsh` is the thing to NOT copy.
-# new_cwd defaults to "follow" — the same as tmux's -c "#{pane_current_path}".
+# default_shell unset = $SHELL; new_cwd defaults to "follow"
 
 [ui]
-# tmux opens a window without asking for its name (automatic-rename on)
 prompt_new_tab_name = false
 accent = "{{accent}}"
 
 [theme]
-# Every token herdr exposes is overridden below, so the base theme only
-# supplies whatever herdr does not let a config reach.
 name = "catppuccin"
 
-# Palette tokens from themes/<name>/<mode>.toml — see themes/README.md.
 [theme.custom]
 accent = "{{accent}}"
 panel_bg = "{{bg}}"
