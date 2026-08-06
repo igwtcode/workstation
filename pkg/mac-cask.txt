@@ -7,6 +7,7 @@ google-chrome
 # security & passwords
 1password
 1password-cli
+proton-pass
 
 # terminal emulators
 ghostty

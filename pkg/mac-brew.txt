@@ -40,6 +40,9 @@ yq
 yt-dlp
 zoxide
 
+# security & passwords
+proton-pass-cli
+
 # git & version control
 gh
 git
