@@ -13,6 +13,7 @@ config/herdr/config.toml
 config/lazygit/config.yml
 config/lazydocker/config.yml
 config/git/config
+config/git/ignore
 
 # Machine-local desktop pieces (monitor layout per machine)
 config/niri/local.kdl
