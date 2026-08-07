@@ -79,6 +79,8 @@ alias cp-awsprofile=' sel-awsprofile | tr -d "\n" | clipcopy'
 alias cr='cargo run -- '
 alias crq='cargo run -q -- '
 alias gd='git diff'
+# go-gh's keyring fallback ignores GH_CONFIG_DIR, so pass the zone's token
+alias ghd=' GH_TOKEN=$(gh auth token) gh dash'
 alias gl="git log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) %C(dim white)%<(16)%an%C(reset) %C(bold green)%<(14)%ar%C(reset) %C(white)%s%C(reset)%C(auto)%d%C(reset)' --all"
 alias gp='git pull --all --prune'
 alias hist='history -E'
