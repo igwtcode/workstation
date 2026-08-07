@@ -68,6 +68,11 @@ update_shared_tools() {
   if ws_has tldr; then
     step "tldr: refresh page cache" tldr --update
   fi
+  if ws_has gh; then
+    # exits non-zero when nothing is installed, which must not abort the run
+    step "gh: upgrade extensions" gh extension upgrade --all ||
+      warn "gh extension upgrade failed — continuing"
+  fi
   # mise itself is paru/brew-managed (self-update is disabled for package
   # manager installs); this only bumps the repo dev tools in .mise/config.toml
   step "mise: upgrade repo dev tools" mise up

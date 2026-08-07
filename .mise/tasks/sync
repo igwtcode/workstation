@@ -42,6 +42,12 @@ _install_tpm() {
   "$dir/bin/install_plugins"
 }
 
+# extensions live in one shared dir, not per $GH_CONFIG_DIR
+_install_gh_dash() {
+  gh extension list 2>/dev/null | grep -q dlvhdr/gh-dash && return 0
+  gh extension install dlvhdr/gh-dash
+}
+
 # Some tools hardcode ~/.aws/credentials and ignore the per-zone
 # AWS_SHARED_CREDENTIALS_FILE. Point the default at one zone's file so they
 # resolve; relative target so it survives the tree moving. Only ever created
@@ -57,6 +63,10 @@ post_sync_hooks() {
 
   if ws_has git && [[ -d $HOME/.config/tmux && ! -d $HOME/.config/tmux/plugins/tpm ]]; then
     hook "install tmux plugin manager (tpm)" _install_tpm
+  fi
+
+  if ws_has gh; then
+    hook "install the gh-dash extension" _install_gh_dash
   fi
 
   # the zone name lands in a path, so hold it to the same shape zone.sh does
