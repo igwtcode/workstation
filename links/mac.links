@@ -16,6 +16,9 @@ config/vscode/keybindings.json ~/Library/Application Support/Code/User/keybindin
 config/gh/config.yml ~/.config/gh-work/config.yml
 config/gh/config.yml ~/.config/gh-personal/config.yml
 
+# gh-dash
+config/gh-dash/config.yml ~/.config/gh-dash/config.yml
+
 # CLI tools beyond the server profile
 config/herdr ~/.config/herdr
 config/claude ~/.config/ws/claude

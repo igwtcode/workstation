@@ -1,0 +1,112 @@
+# Global gh-dash config. Per-repo .gh-dash.yml files layer over it.
+# No theme.colors: gh-dash defaults to ANSI, so it follows the terminal.
+
+prSections:
+  - title: mine
+    filters: is:open author:@me
+  - title: review
+    filters: is:open review-requested:@me
+  - title: involved
+    filters: is:open involves:@me -author:@me
+  - title: not-mine
+    filters: is:open -author:@me sort:updated-desc
+  - title: merged
+    filters: is:merged author:@me sort:updated-desc
+
+issuesSections:
+  - title: mine
+    filters: is:open author:@me
+  - title: assigned
+    filters: is:open assignee:@me
+  - title: involved
+    filters: is:open involves:@me -author:@me
+  - title: not-mine
+    filters: is:open -author:@me sort:updated-desc
+
+notificationsSections:
+  - title: All
+    filters: ""
+  - title: Created
+    filters: reason:author
+  - title: Participating
+    filters: reason:participating
+  - title: Mentioned
+    filters: reason:mention
+  - title: Review Requested
+    filters: reason:review-requested
+  - title: Assigned
+    filters: reason:assign
+  - title: Subscribed
+    filters: reason:subscribed
+  - title: Team Mentioned
+    filters: reason:team-mention
+
+repo:
+  branchesRefetchIntervalSeconds: 30
+  prsRefetchIntervalSeconds: 60
+
+defaults:
+  view: issues
+  prsLimit: 20
+  issuesLimit: 20
+  notificationsLimit: 20
+  prApproveComment: LGTM
+  refetchIntervalMinutes: 30
+  preview:
+    open: false
+    width: 0.7
+    height: 0.6
+    position: auto
+  layout:
+    prs:
+      updatedAt:
+        width: 5
+      createdAt:
+        width: 5
+      repo:
+        width: 20
+      author:
+        width: 20
+      authorIcon:
+        hidden: true
+      labels:
+        width: 25
+        hidden: true
+      assignees:
+        width: 20
+        hidden: true
+      base:
+        width: 15
+        hidden: true
+      lines:
+        width: 15
+    issues:
+      updatedAt:
+        width: 5
+      createdAt:
+        width: 5
+      repo:
+        width: 20
+      creator:
+        width: 20
+      creatorIcon:
+        hidden: true
+      assignees:
+        width: 20
+        hidden: true
+
+theme:
+  ui:
+    sectionsShowCount: true
+    table:
+      showSeparator: true
+      compact: false
+
+pager:
+  diff: delta
+
+repoPaths: {}
+confirmQuit: false
+showAuthorIcons: true
+smartFilteringAtLaunch: true
+includeReadNotifications: true
