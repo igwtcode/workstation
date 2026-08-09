@@ -18,6 +18,9 @@ setopt SHARE_HISTORY
 setopt prompt_subst
 setopt AUTO_CD
 
+bindkey -v
+export KEYTIMEOUT=1 # hundredths of a second; zsh's 400ms default makes vi mode switches feel laggy
+
 # --- completion ---------------------------------------------------------
 
 zstyle ':completion:*' use-cache on

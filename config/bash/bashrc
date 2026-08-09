@@ -16,6 +16,8 @@ export EDITOR=nvim
 export VISUAL=nvim
 export PATH=$PATH:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.local/bin
 
+set -o vi
+
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ls='ls --color=auto'
