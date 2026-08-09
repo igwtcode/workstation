@@ -12,6 +12,7 @@ make
 
 # shell & prompt
 carapace
+fzf-tab
 herdr
 starship
 tmux

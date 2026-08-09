@@ -27,6 +27,9 @@ zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
 zstyle ':completion:*' matcher-list 'r:|=*' 'l:|=*' 'r:|=* m:{a-z\-}={A-Z\_}'
 zstyle ':completion:*' list-dirs-first true
+# group headers (carapace's per-flag descriptions) + hand the menu to fzf-tab
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*' menu no
 
 fpath=(~/.local/share/zsh/site-functions $fpath)
 
@@ -270,6 +273,13 @@ command -v aws_completer &>/dev/null && complete -C "$(command -v aws_completer)
 command -v carapace &>/dev/null && source <(carapace _carapace)
 
 # Plugins: first readable candidate wins (pacman path on arch, brew on mac).
+# fzf-tab must load after compinit (above) but before autosuggestions/
+# syntax-highlighting below, which wrap the completion widget too.
+for _p in \
+  /usr/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh \
+  ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/fzf-tab/fzf-tab.zsh}; do
+  [[ -r $_p ]] && source $_p && break
+done
 for _p in \
   /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh \
   ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh}; do
