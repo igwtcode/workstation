@@ -28,6 +28,17 @@ resize_mode = "prefix+shift+r"
 detach = ["prefix+d", "prefix+q"]
 workspace_picker = ["prefix+w", "prefix+o"]
 
+# --- popups (tmux M-g / tmux-toggle-popup equivalent) -------------------
+[[keys.command]]
+key = "alt+g"
+type = "popup"
+# mise's env hook only fires on prompt display, which a popup never shows —
+# apply it explicitly so GH_CONFIG_DIR (identity zone) reaches lazygit
+command = 'eval $(mise hook-env); exec lazygit'
+description = "lazygit popup"
+width = "99%"
+height = "99%"
+
 [terminal]
 # default_shell unset = $SHELL; new_cwd defaults to "follow"
 
