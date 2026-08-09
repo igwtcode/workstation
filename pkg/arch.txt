@@ -17,6 +17,7 @@ reflector
 
 # shell & prompt
 bash-completion
+carapace-bin
 herdr-bin
 starship
 tmux

@@ -11,6 +11,7 @@ grep
 make
 
 # shell & prompt
+carapace
 herdr
 starship
 tmux

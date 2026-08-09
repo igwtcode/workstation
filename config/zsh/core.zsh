@@ -267,6 +267,7 @@ command -v fzf &>/dev/null && source <(fzf --zsh)
 command -v gh &>/dev/null && source <(gh completion -s zsh)
 command -v go-task &>/dev/null && eval "$(go-task --completion zsh)"
 command -v aws_completer &>/dev/null && complete -C "$(command -v aws_completer)" aws
+command -v carapace &>/dev/null && source <(carapace _carapace)
 
 # Plugins: first readable candidate wins (pacman path on arch, brew on mac).
 for _p in \
