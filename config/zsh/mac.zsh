@@ -27,4 +27,5 @@ clipcopy() { pbcopy "$@" }
 
 # keep the machine awake while agents run (display still sleeps)
 claude() { caffeinate -i command claude "$@" }
+codex() { caffeinate -i command codex "$@" }
 opencode() { caffeinate -i command opencode "$@" }
