@@ -12,10 +12,12 @@ rename_tab = ["prefix+shift+t", "prefix+comma"]
 close_tab = ["prefix+shift+x", "prefix+ampersand"]
 
 # --- panes -------------------------------------------------------------------
-focus_pane_left = ["prefix+h", "ctrl+h"]
-focus_pane_down = ["prefix+j", "ctrl+j"]
-focus_pane_up = ["prefix+k", "ctrl+k"]
-focus_pane_right = ["prefix+l", "ctrl+l"]
+# bare ctrl+h/j/k/l are custom commands below, not focus_pane_* directly —
+# they must check for nvim before deciding to forward the key or focus
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
 split_vertical = ["prefix+v", "prefix+percent"]
 split_horizontal = ["prefix+minus", "prefix+double_quote"]
 zoom = ["prefix+z", "alt+z"]
@@ -27,6 +29,31 @@ reload_config = "prefix+r"
 resize_mode = "prefix+shift+r"
 detach = ["prefix+d", "prefix+q"]
 workspace_picker = ["prefix+w", "prefix+o"]
+
+# --- vim-aware pane navigation (tmux's vim-tmux-navigator equivalent) -------
+[[keys.command]]
+key = "ctrl+h"
+type = "shell"
+command = "$HOME/.config/herdr/nvim-nav.sh left"
+description = "pane/vim-split navigate left"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "shell"
+command = "$HOME/.config/herdr/nvim-nav.sh down"
+description = "pane/vim-split navigate down"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "shell"
+command = "$HOME/.config/herdr/nvim-nav.sh up"
+description = "pane/vim-split navigate up"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "shell"
+command = "$HOME/.config/herdr/nvim-nav.sh right"
+description = "pane/vim-split navigate right"
 
 # --- popups (tmux M-g / tmux-toggle-popup equivalent) -------------------
 [[keys.command]]

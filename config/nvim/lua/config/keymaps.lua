@@ -19,7 +19,23 @@ vim.keymap.set("n", "#", "#zz")
 
 vim.keymap.set("x", "p", '"_dP', { noremap = true, silent = true })
 
-vim.keymap.set("n", "<C-h>", ":NvimTmuxNavigateLeft<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-j>", ":NvimTmuxNavigateDown<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-k>", ":NvimTmuxNavigateUp<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-l>", ":NvimTmuxNavigateRight<CR>", { noremap = true, silent = true })
+if vim.env.HERDR_ENV then
+	local herdr_nav = require("config.herdr-nav")
+	vim.keymap.set("n", "<C-h>", function()
+		herdr_nav.navigate("h")
+	end, { noremap = true, silent = true })
+	vim.keymap.set("n", "<C-j>", function()
+		herdr_nav.navigate("j")
+	end, { noremap = true, silent = true })
+	vim.keymap.set("n", "<C-k>", function()
+		herdr_nav.navigate("k")
+	end, { noremap = true, silent = true })
+	vim.keymap.set("n", "<C-l>", function()
+		herdr_nav.navigate("l")
+	end, { noremap = true, silent = true })
+else
+	vim.keymap.set("n", "<C-h>", ":NvimTmuxNavigateLeft<CR>", { noremap = true, silent = true })
+	vim.keymap.set("n", "<C-j>", ":NvimTmuxNavigateDown<CR>", { noremap = true, silent = true })
+	vim.keymap.set("n", "<C-k>", ":NvimTmuxNavigateUp<CR>", { noremap = true, silent = true })
+	vim.keymap.set("n", "<C-l>", ":NvimTmuxNavigateRight<CR>", { noremap = true, silent = true })
+end
