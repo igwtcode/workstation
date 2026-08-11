@@ -1,0 +1,35 @@
+# nord — palette + ANSI mapping from the upstream alacritty port:
+# https://github.com/nordtheme/alacritty/blob/main/src/nord.yaml
+# bg_alt = color0/nord1; fg_dim = color8/nord3 (alacritty's bright black,
+# doubles as selection_bg); accent = nord8 (search match highlight); no
+# official light palette is published upstream.
+
+name = "nord-dark"
+mode = "dark"
+
+bg = "#2e3440"
+bg_alt = "#3b4252"
+fg = "#d8dee9"
+fg_dim = "#4c566a"
+accent = "#88c0d0"
+selection_bg = "#4c566a"
+selection_fg = "#d8dee9"
+cursor = "#d8dee9"
+border = "#434c5e"
+
+color0 = "#3b4252"
+color1 = "#bf616a"
+color2 = "#a3be8c"
+color3 = "#ebcb8b"
+color4 = "#81a1c1"
+color5 = "#b48ead"
+color6 = "#88c0d0"
+color7 = "#e5e9f0"
+color8 = "#4c566a"
+color9 = "#bf616a"
+color10 = "#a3be8c"
+color11 = "#ebcb8b"
+color12 = "#81a1c1"
+color13 = "#b48ead"
+color14 = "#8fbcbb"
+color15 = "#eceff4"
