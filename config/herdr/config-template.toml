@@ -82,7 +82,10 @@ panel_bg = "{{bg}}"
 surface0 = "{{selection_bg}}"
 surface1 = "{{border}}"
 surface_dim = "{{bg_alt}}"
-overlay0 = "{{color8}}"
+# overlay0 = fg_dim, not color8: color8 (ANSI bright-black) sits near-bg by
+# design in several palettes, making overlay0-colored text (tab numbers,
+# inactive sidebar titles) unreadable against panel/border backgrounds
+overlay0 = "{{fg_dim}}"
 overlay1 = "{{fg_dim}}"
 text = "{{fg}}"
 subtext0 = "{{fg_dim}}"
