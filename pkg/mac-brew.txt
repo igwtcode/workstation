@@ -42,6 +42,9 @@ yq
 yt-dlp
 zoxide
 
+# networking
+wireguard-tools
+
 # security & passwords
 proton-pass-cli
 
