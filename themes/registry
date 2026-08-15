@@ -23,5 +23,5 @@ config/git/config-template config/git/config -
 config/bat/themes/colors-template.tmTheme config/bat/themes/colors.tmTheme bat cache --build
 config/k9s/skins/colors-template.yaml config/k9s/skins/colors.yaml -
 config/superfile/theme/colors-template.toml config/superfile/theme/colors.toml -
-config/ghostty/themes/colors-template config/ghostty/themes/colors -
+config/ghostty/themes/colors-template config/ghostty/themes/colors for p in $(ps -Ao pid=,comm= | awk '$2 ~ /ghostty$/ {print $1}'); do kill -USR2 "$p"; done
 config/kitty/themes/colors-template.conf config/kitty/themes/colors.conf pkill -USR1 -x kitty || true
