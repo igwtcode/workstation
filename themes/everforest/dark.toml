@@ -3,6 +3,8 @@
 # ANSI mapping from the colorscheme's own terminal colors
 # (colors/everforest.vim: 0/8=bg3, 7/15=fg, bright == normal).
 # selection_bg = bg_visual; border = bg4 (window separators); accent = green
+# color8 (ANSI bright black) = fg_dim: upstream's own value renders dim
+# text near-invisible, and tools that ignore fg_dim reach for color8.
 
 name = "everforest-dark"
 mode = "dark"
@@ -25,7 +27,7 @@ color4 = "#7fbbb3"
 color5 = "#d699b6"
 color6 = "#83c092"
 color7 = "#d3c6aa"
-color8 = "#475258"
+color8 = "#859289"
 color9 = "#e67e80"
 color10 = "#a7c080"
 color11 = "#dbbc7f"

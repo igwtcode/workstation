@@ -6,6 +6,8 @@
 # cursor = rosewater (the kitty port's choice). Selection is surface1/text,
 # not the port's rosewater: selection_bg also backs UI row highlights (fzf,
 # nvim, lazygit), and an accent-bright bar leaves the fg unreadable.
+# color8 (ANSI bright black) = fg_dim: upstream's own value renders dim
+# text near-invisible, and tools that ignore fg_dim reach for color8.
 
 name = "catppuccin-dark"
 mode = "dark"
@@ -28,7 +30,7 @@ color4 = "#89b4fa"
 color5 = "#f5c2e7"
 color6 = "#94e2d5"
 color7 = "#bac2de"
-color8 = "#585b70"
+color8 = "#9399b2"
 color9 = "#f38ba8"
 color10 = "#a6e3a1"
 color11 = "#f9e2af"

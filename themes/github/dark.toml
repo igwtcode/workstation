@@ -5,6 +5,8 @@
 # fg/fg_dim/accent use the theme's shipped overrides; cursor = accent
 # (editorCursor); selection_bg = scale.blue[8] (upstream selection is an
 # alpha blend — nearest published opaque hex); ANSI from the ansi scale
+# color8 (ANSI bright black) = fg_dim: upstream's own value renders dim
+# text near-invisible, and tools that ignore fg_dim reach for color8.
 
 name = "github-dark"
 mode = "dark"
@@ -27,7 +29,7 @@ color4 = "#58a6ff"
 color5 = "#bc8cff"
 color6 = "#39c5cf"
 color7 = "#b1bac4"
-color8 = "#6e7681"
+color8 = "#7d8590"
 color9 = "#ffa198"
 color10 = "#56d364"
 color11 = "#e3b341"

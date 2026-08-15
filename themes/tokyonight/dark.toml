@@ -5,6 +5,8 @@
 # against bg (~2.8:1 contrast); dark5 is the same palette table's
 # de-emphasized-but-legible foreground tier; border = bg_highlight;
 # accent = blue
+# color8 (ANSI bright black) = fg_dim: upstream's own value renders dim
+# text near-invisible, and tools that ignore fg_dim reach for color8.
 
 name = "tokyonight-dark"
 mode = "dark"
@@ -27,7 +29,7 @@ color4 = "#7aa2f7"
 color5 = "#bb9af7"
 color6 = "#7dcfff"
 color7 = "#a9b1d6"
-color8 = "#414868"
+color8 = "#737aa2"
 color9 = "#ff899d"
 color10 = "#9fe044"
 color11 = "#faba4a"
