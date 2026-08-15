@@ -72,6 +72,8 @@ export FZF_DEFAULT_OPTS=" \
 # dirs are symlinked, so they resolve on every machine once rendered).
 [[ -f $XDG_CONFIG_HOME/fzf/colors.sh ]] && source $XDG_CONFIG_HOME/fzf/colors.sh
 [[ -f $XDG_CONFIG_HOME/gum/colors.sh ]] && source $XDG_CONFIG_HOME/gum/colors.sh
+# zsh's own snippet sits next to this file: only zshenv/zshrc are symlinked.
+[[ -f $_ws_zdir/colors.sh ]] && source $_ws_zdir/colors.sh
 
 # --- aliases --------------------------------------------------------------
 

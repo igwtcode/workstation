@@ -11,6 +11,7 @@
 
 config/fzf/colors-template.sh config/fzf/colors.sh -
 config/gum/colors-template.sh config/gum/colors.sh -
+config/zsh/colors-template.sh config/zsh/colors.sh -
 config/claude/colors-template.sh config/claude/colors.sh -
 config/tmux/colors-template.conf config/tmux/colors.conf tmux source-file ~/.config/tmux/tmux.conf
 config/herdr/config-template.toml config/herdr/config.toml if herdr status server 2>/dev/null | grep -q '^status: running$'; then herdr server reload-config; fi
