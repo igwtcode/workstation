@@ -17,7 +17,6 @@ reflector
 
 # shell & prompt
 bash-completion
-carapace-bin
 fzf-tab
 herdr-bin
 starship

@@ -27,7 +27,7 @@ zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
 zstyle ':completion:*' matcher-list 'r:|=*' 'l:|=*' 'r:|=* m:{a-z\-}={A-Z\_}'
 zstyle ':completion:*' list-dirs-first true
-# group headers (carapace's per-flag descriptions) + hand the menu to fzf-tab
+# group headers + hand the menu to fzf-tab
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' menu no
 
@@ -270,7 +270,6 @@ command -v fzf &>/dev/null && source <(fzf --zsh)
 command -v gh &>/dev/null && source <(gh completion -s zsh)
 command -v go-task &>/dev/null && eval "$(go-task --completion zsh)"
 command -v aws_completer &>/dev/null && complete -C "$(command -v aws_completer)" aws
-command -v carapace &>/dev/null && source <(carapace _carapace)
 
 # Plugins: first readable candidate wins (pacman path on arch, brew on mac).
 # fzf-tab must load after compinit (above) but before autosuggestions/
