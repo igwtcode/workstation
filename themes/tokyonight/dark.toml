@@ -1,7 +1,10 @@
 # tokyonight dark (night variant) — colors from the upstream extras:
 # https://github.com/folke/tokyonight.nvim/blob/main/extras/kitty/tokyonight_night.conf
 # https://github.com/folke/tokyonight.nvim/blob/main/extras/lua/tokyonight_night.lua
-# bg_alt = bg_dark; fg_dim = comment; border = bg_highlight; accent = blue
+# bg_alt = bg_dark; fg_dim = dark5, not comment: comment reads near-invisible
+# against bg (~2.8:1 contrast); dark5 is the same palette table's
+# de-emphasized-but-legible foreground tier; border = bg_highlight;
+# accent = blue
 
 name = "tokyonight-dark"
 mode = "dark"
@@ -9,7 +12,7 @@ mode = "dark"
 bg = "#1a1b26"
 bg_alt = "#16161e"
 fg = "#c0caf5"
-fg_dim = "#565f89"
+fg_dim = "#737aa2"
 accent = "#7aa2f7"
 selection_bg = "#283457"
 selection_fg = "#c0caf5"
