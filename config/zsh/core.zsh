@@ -30,6 +30,8 @@ zstyle ':completion:*' list-dirs-first true
 # group headers + hand the menu to fzf-tab
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' menu no
+# fzf-tab for flags and options only; file/dir completion stays native zsh
+zstyle ':fzf-tab:*' disabled-on files
 
 fpath=(~/.local/share/zsh/site-functions $fpath)
 
