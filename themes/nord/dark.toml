@@ -1,8 +1,10 @@
 # nord — palette + ANSI mapping from the upstream alacritty port:
 # https://github.com/nordtheme/alacritty/blob/main/src/nord.yaml
-# bg_alt = color0/nord1; fg_dim = color8/nord3 (alacritty's bright black,
-# doubles as selection_bg); accent = nord8 (search match highlight); no
-# official light palette is published upstream.
+# bg_alt = color0/nord1; selection_bg = nord3 (alacritty's bright black);
+# fg_dim = nord3_gui_bright, the brightened nord3 the official vim port uses
+# for Comment (nordtheme/vim colors/nord.vim) — plain nord3 sits too close
+# to bg to read as dim text rather than invisible; accent = nord8 (search
+# match highlight); no official light palette is published upstream.
 
 name = "nord-dark"
 mode = "dark"
@@ -10,7 +12,7 @@ mode = "dark"
 bg = "#2e3440"
 bg_alt = "#3b4252"
 fg = "#d8dee9"
-fg_dim = "#4c566a"
+fg_dim = "#616e88"
 accent = "#88c0d0"
 selection_bg = "#4c566a"
 selection_fg = "#d8dee9"
