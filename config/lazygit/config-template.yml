@@ -11,10 +11,10 @@ git:
     showGraph: when-maximised
   allBranchesLogCmds:
     - git log --graph --color=always --abbrev-commit --decorate --date=local --pretty=medium --
-  pagers:
+  diffRenderers:
     # delta picks its colors up from the rendered git config ([delta] section)
     - colorArg: always
-      pager: delta --paging=never --tabs=2
+      command: delta --paging=never --tabs=2
 gui:
   useHunkModeInStagingView: false
   timeFormat: 01/02 15:04:05
