@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Claude Code status line: model, context gauge, cumulative session tokens,
-# 5h/7d rate limits, MCP call count.
+# Claude Code status line: model, reasoning effort, context gauge, 5h/7d rate
+# limits with pace and reset countdowns, MCP call count.
 #
 # Colors come from colors.sh next to this file, rendered by `mise run theme`
 # from the active palette — so the status line follows the machine's theme.
@@ -19,7 +19,7 @@ input=$(cat)
 # Defaults keep the status line readable before the first `mise run theme`
 # (colors.sh is generated, so a fresh checkout has none).
 WS_SL_MODEL="#fabd2f" WS_SL_LOW="#b8bb26" WS_SL_MID="#fe8019" WS_SL_HIGH="#fb4934"
-WS_SL_SESSION="#8ec07c" WS_SL_MCP="#83a598" WS_SL_LIMIT="#d3869b"
+WS_SL_EFFORT="#8ec07c" WS_SL_MCP="#83a598" WS_SL_LIMIT="#d3869b"
 WS_SL_TEXT="#ebdbb2" WS_SL_MUTED="#928374"
 _colors=${BASH_SOURCE[0]%/*}/colors.sh
 # shellcheck source=/dev/null
@@ -36,7 +36,7 @@ MODEL=$(sgr "$WS_SL_MODEL")
 LOW=$(sgr "$WS_SL_LOW")
 MID=$(sgr "$WS_SL_MID")
 HIGH=$(sgr "$WS_SL_HIGH")
-SESSION=$(sgr "$WS_SL_SESSION")
+EFFORT=$(sgr "$WS_SL_EFFORT")
 MCP=$(sgr "$WS_SL_MCP")
 LIMIT=$(sgr "$WS_SL_LIMIT")
 TEXT=$(sgr "$WS_SL_TEXT")
@@ -47,6 +47,7 @@ SEP="  ${MUTED}|${RST}  "
 
 # --- input ------------------------------------------------------------------
 model=$(jq -r '.model.display_name // "Unknown"' <<<"$input" | sed 's/^Claude //')
+effort=$(jq -r '.effort.level // ""' <<<"$input")
 ctx_size=$(jq -r '.context_window.context_window_size // 0' <<<"$input")
 total_in=$(jq -r '.context_window.total_input_tokens // 0' <<<"$input")
 used_pct_raw=$(jq -r '.context_window.used_percentage // ""' <<<"$input")
@@ -54,6 +55,8 @@ transcript=$(jq -r '.transcript_path // ""' <<<"$input")
 five_pct_raw=$(jq -r '.rate_limits.five_hour.used_percentage // ""' <<<"$input")
 five_reset=$(jq -r '.rate_limits.five_hour.resets_at // ""' <<<"$input")
 week_pct_raw=$(jq -r '.rate_limits.seven_day.used_percentage // ""' <<<"$input")
+week_reset=$(jq -r '.rate_limits.seven_day.resets_at // ""' <<<"$input")
+now=$(date +%s)
 
 # --- helpers ----------------------------------------------------------------
 fmt_num() {
@@ -75,6 +78,42 @@ pct_color() {
     printf '%s' "$MID"
   else
     printf '%s' "$LOW"
+  fi
+}
+
+# fmt_reset <epoch> — "  rst:<countdown>" for a rate-limit window; empty when
+# the window carries no reset time.
+fmt_reset() {
+  local at=${1%%.*} left d h m
+  [[ -n $at ]] || return 0
+  left=$((at - now))
+  if [[ $left -le 0 ]]; then
+    printf '  %srst:now%s' "$MUTED" "$RST"
+  elif [[ $((left / 86400)) -gt 0 ]]; then
+    d=$((left / 86400)) h=$((left % 86400 / 3600))
+    printf '  %srst:%dd%dh%s' "$MUTED" "$d" "$h" "$RST"
+  elif [[ $((left / 3600)) -gt 0 ]]; then
+    h=$((left / 3600)) m=$((left % 3600 / 60))
+    printf '  %srst:%dh%dm%s' "$MUTED" "$h" "$m" "$RST"
+  else
+    m=$((left / 60))
+    printf '  %srst:%dm%s' "$MUTED" "$m" "$RST"
+  fi
+}
+
+# pace <used-pct> <resets-at> <window-seconds> — usage against the clock:
+# "(+N%)" reserved when it trails the elapsed share of the window, "(-N%)" when
+# it runs ahead. A window starts its own length before it resets.
+pace() {
+  local used=$1 at=${2%%.*} span=$3 left diff
+  [[ -n $at ]] || return 0
+  left=$((at - now))
+  [[ $left -ge 0 && $left -le $span ]] || return 0
+  diff=$(((span - left) * 100 / span - used))
+  if [[ $diff -ge 0 ]]; then
+    printf ' %s(+%d%%)%s' "$LOW" "$diff" "$RST"
+  else
+    printf ' %s(%d%%)%s' "$HIGH" "$diff" "$RST"
   fi
 }
 
@@ -100,23 +139,10 @@ build_bar() {
   printf '%s%s' "$bar" "$RST"
 }
 
-# --- transcript scan: MCP calls + cumulative session tokens ------------------
-# Cumulative total = every API call's tokens across the session (input + cache
-# creation + cache read + output). That is the number that counts toward the
-# 5h/7d limits, because each call re-sends the whole growing context.
+# --- transcript scan: MCP calls ---------------------------------------------
 mcp_count=0
-cum_tokens=0
 if [[ -n $transcript && -f $transcript ]]; then
   mcp_count=$(grep -c '"name": *"mcp__[^"]*"' "$transcript" 2>/dev/null || true)
-  cum_tokens=$(jq -r '
-    select(.type == "assistant") |
-    .message.usage |
-    select(. != null) |
-    ((.input_tokens // 0)
-     + (.cache_creation_input_tokens // 0)
-     + (.cache_read_input_tokens // 0)
-     + (.output_tokens // 0))
-  ' "$transcript" 2>/dev/null | awk '{s+=$1} END{print s+0}')
 fi
 
 # --- context gauge ----------------------------------------------------------
@@ -131,43 +157,26 @@ else
 fi
 ctx_section="$(build_bar "$pct_int") ${TEXT}$(fmt_num "$total_in")/$(fmt_num "$ctx_size")${RST} ${MID}${pct_int}%${RST}"
 
-# --- cumulative session tokens ----------------------------------------------
-cum_section=""
-if [[ $cum_tokens -gt 0 ]]; then
-  cum_section="${MUTED}sess${RST} ${SESSION}$(fmt_num "$cum_tokens")${RST}"
-fi
-
-# --- 5-hour limit: gauge, percentage, reset countdown -----------------------
+# --- 5-hour limit: gauge, percentage, pace, reset countdown -----------------
 if [[ -n $five_pct_raw ]]; then
   five_int=$(awk "BEGIN{printf \"%d\", int($five_pct_raw)}")
-  rst_str=""
-  if [[ -n $five_reset ]]; then
-    secs_left=$((five_reset - $(date +%s)))
-    if [[ $secs_left -le 0 ]]; then
-      rst_str="  ${MUTED}rst:now${RST}"
-    elif [[ $((secs_left / 3600)) -gt 0 ]]; then
-      rst_str="  ${MUTED}rst:$((secs_left / 3600))h$(((secs_left % 3600) / 60))m${RST}"
-    else
-      rst_str="  ${MUTED}rst:$((secs_left / 60))m${RST}"
-    fi
-  fi
-  five_section="${LIMIT}5h${RST} $(build_bar "$five_int") $(pct_color "$five_int")${five_int}%${RST}${rst_str}"
+  five_section="${LIMIT}5h${RST} $(build_bar "$five_int") $(pct_color "$five_int")${five_int}%${RST}$(pace "$five_int" "$five_reset" $((5 * 3600)))$(fmt_reset "$five_reset")"
 else
   five_section="${LIMIT}5h${RST} ${MUTED}░░░░░░░░░░${RST} ${MUTED}--%${RST}"
 fi
 
-# --- 7-day limit ------------------------------------------------------------
+# --- 7-day limit: gauge, percentage, pace, reset countdown ------------------
 if [[ -n $week_pct_raw ]]; then
   week_int=$(awk "BEGIN{printf \"%d\", int($week_pct_raw)}")
-  week_section="${LIMIT}7d${RST} $(pct_color "$week_int")${week_int}%${RST}"
+  week_section="${LIMIT}7d${RST} $(build_bar "$week_int") $(pct_color "$week_int")${week_int}%${RST}$(pace "$week_int" "$week_reset" $((7 * 86400)))$(fmt_reset "$week_reset")"
 else
-  week_section="${LIMIT}7d${RST} ${MUTED}--%${RST}"
+  week_section="${LIMIT}7d${RST} ${MUTED}░░░░░░░░░░${RST} ${MUTED}--%${RST}"
 fi
 
 # --- assemble ---------------------------------------------------------------
-out="${MODEL}${model}${RST}${SEP}${ctx_section}"
-[[ -n $cum_section ]] && out="${out}${SEP}${cum_section}"
-out="${out}${SEP}${five_section}${SEP}${week_section}"
+out="${MODEL}${model}${RST}"
+[[ -n $effort ]] && out="${out} ${EFFORT}${effort}${RST}"
+out="${out}${SEP}${ctx_section}${SEP}${five_section}${SEP}${week_section}"
 [[ $mcp_count -gt 0 ]] && out="${out}${SEP}${MCP}mcp:${mcp_count}${RST}"
 
 printf '%s\n' "$out"
