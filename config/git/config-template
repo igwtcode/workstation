@@ -39,6 +39,11 @@
 [diff]
   colorMoved = default
 
+# The system gitconfig sets osxkeychain; an empty `helper` clears inherited
+# ones so CodeCommit falls through to the per-repo aws helper.
+[credential "https://git-codecommit.eu-central-1.amazonaws.com"]
+  helper =
+
 [credential "https://github.com"]
   helper =
   helper = !gh auth git-credential
