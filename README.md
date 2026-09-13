@@ -54,6 +54,9 @@ at once.
 Launch editors from a shell already inside the zone — GUI launchers inherit
 no zone env.
 
+`CODEX_HOME` selects Codex's credentials, configuration, and session storage.
+The personal zone defaults to `~/.codex`; override it through mise to use another account per directory tree.
+
 ## Private layer
 
 Secrets stay in 1Password (`op` CLI). Two gitignored files carry everything
