@@ -61,7 +61,8 @@ key = "alt+g"
 type = "popup"
 # mise's env hook only fires on prompt display, which a popup never shows —
 # apply it explicitly so GH_CONFIG_DIR (identity zone) reaches lazygit
-command = 'eval $(mise hook-env); exec lazygit'
+# quoted: the popup shell word-splits an unquoted $( ) into one broken line
+command = 'eval "$(mise hook-env)"; exec lazygit'
 description = "lazygit popup"
 width = "99%"
 height = "99%"
