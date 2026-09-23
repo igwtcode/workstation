@@ -27,6 +27,9 @@ steipete/tap/codexbar
 # dev environments
 devpod
 
+# devops & infra
+session-manager-plugin
+
 # mobile dev (expo/react native on android)
 android-studio
 zulu@17
