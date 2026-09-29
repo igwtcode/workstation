@@ -3,7 +3,41 @@
 # and per-OS layers live next to this file's real location in the repo, so
 # resolving the symlink finds them without any hardcoded repo path.
 
-_ws_zdir="$(dirname "$(realpath ~/.zshrc)")"
+_ws_zdir=${${:-$HOME/.zshrc}:A:h}
+
+zmodload -F zsh/stat b:zstat
+
+# _ws_cached <cmd> [args...] — source cmd's generated init script from a cache
+# keyed on the binary's resolved path and mtime, regenerated on upgrade
+_ws_cached() {
+  local bin=$1 d out line
+  local -a mt
+  # a mise shim resolves to mise itself, which would key the cache wrongly
+  if [[ $bin != /* ]]; then
+    bin=
+    for d in $path; do
+      [[ $d == */mise/shims ]] && continue
+      [[ -x $d/$1 ]] && bin=$d/$1 && break
+    done
+  fi
+  if [[ ! -x $bin ]]; then
+    (( $+commands[$1] )) && source <("$@")
+    return 0
+  fi
+  bin=${bin:A}
+  zstat -A mt +mtime -- $bin 2>/dev/null || return 0
+  out=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/init/${1:t}.zsh
+  [[ -r $out ]] && read -r line <$out
+  if [[ $line != "# $bin $mt[1]" ]]; then
+    mkdir -p ${out:h}
+    if ! { print -r -- "# $bin $mt[1]" && $bin "${@:2}" } >|$out.$$ 2>/dev/null; then
+      rm -f $out.$$
+      return 0
+    fi
+    mv -f $out.$$ $out
+  fi
+  source $out
+}
 
 # OS layer first: it prepares PATH/env (brew shellenv, gnubin, clipboard
 # helper) that the core's tool inits depend on.

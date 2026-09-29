@@ -37,7 +37,14 @@ fpath=(~/.local/share/zsh/site-functions $fpath)
 
 autoload -U +X bashcompinit && bashcompinit
 autoload -Uz compinit
-compinit -u
+# full check (and dump rebuild) every 3h, cached dump otherwise
+_ws_dump=(${ZDOTDIR:-$HOME}/.zcompdump(N.mh+2))
+if (( $#_ws_dump )); then
+  compinit -u && touch $_ws_dump
+else
+  compinit -C
+fi
+unset _ws_dump
 
 # --- environment ----------------------------------------------------------
 
@@ -267,13 +274,14 @@ kc() {
 
 # --- tool inits & completions ----------------------------------------------
 
+# not cached: the output bakes in the current PATH
 command -v mise &>/dev/null && eval "$(mise activate zsh)"
-command -v starship &>/dev/null && eval "$(starship init zsh)"
-command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
-command -v fzf &>/dev/null && source <(fzf --zsh)
-command -v gh &>/dev/null && source <(gh completion -s zsh)
-command -v go-task &>/dev/null && eval "$(go-task --completion zsh)"
-command -v aws_completer &>/dev/null && complete -C "$(command -v aws_completer)" aws
+_ws_cached starship init zsh --print-full-init
+_ws_cached zoxide init zsh
+_ws_cached fzf --zsh
+_ws_cached gh completion -s zsh
+_ws_cached go-task --completion zsh
+(( $+commands[aws_completer] )) && complete -C $commands[aws_completer] aws
 
 # Plugins: first readable candidate wins (pacman path on arch, brew on mac).
 # fzf-tab must load after compinit (above) but before autosuggestions/

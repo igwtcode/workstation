@@ -4,7 +4,7 @@
 # brew gnubin dirs go in front of PATH (CLAUDE.md § Traps). gawk needs no
 # gnubin — its formula ships an unprefixed awk.
 
-eval "$(/opt/homebrew/bin/brew shellenv)"
+_ws_cached /opt/homebrew/bin/brew shellenv zsh
 
 export PATH=$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/grep/libexec/gnubin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$PATH
 
