@@ -9,7 +9,6 @@ config/**/colors.yaml
 config/**/colors.tmTheme
 config/**/themes/colors
 config/starship/config.toml
-config/herdr/config.toml
 config/lazygit/config.yml
 config/lazydocker/config.yml
 config/git/config
@@ -27,10 +26,9 @@ config/nvim/lazy-lock.json.bak
 config/tmux/plugins/
 config/gh/hosts*
 config/gh/state*
-config/herdr/.plugins.lock
-config/herdr/*.log
-config/herdr/*.sock
-config/herdr/session.json
+config/herdr/*
+!config/herdr/config-template.toml
+!config/herdr/nvim-nav.sh
 config/k9s/clusters/
 config/lazygit/state.yml
 config/btop/btop.log
