@@ -30,7 +30,9 @@ case $mode in
     require_cmd zip
     confirm "Back up ~/.ssh to 1Password document '$doc_title'?"
     op_ensure
-    (cd "$HOME" && zip -qr "$tmp/ssh.zip" .ssh -x '*.DS_Store')
+    # zip exits non-zero on sockets: ssh-agent's under .ssh/agent, ControlMaster's anywhere
+    (cd "$HOME" && find .ssh -path .ssh/agent -prune -o \( -type f -o -type l \) ! -name .DS_Store -print |
+      zip -q "$tmp/ssh.zip" -@)
     op_doc_put "$doc_title" "$tmp/ssh.zip"
     log "backed up ~/.ssh → 1Password document '$doc_title'"
     ;;
