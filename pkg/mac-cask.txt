@@ -38,8 +38,8 @@ zulu@17
 orbstack
 
 # launcher / productivity
-raycast
-superwhisper
+#raycast
+#superwhisper
 
 # networking
 tailscale-app
