@@ -152,6 +152,15 @@ gb() {
   [[ -n "$branch" ]] && { git switch "${branch#origin/}"; gp || true }
 }
 
+# cd to the repo/worktree lazygit was in on exit (shift+Q skips)
+function lazygit {
+  local f
+  f=$(mktemp) || return
+  LAZYGIT_NEW_DIR_FILE=$f command lazygit "$@"
+  [[ -s $f ]] && cd "$(<$f)"
+  rm -f "$f"
+}
+
 # stage picked files and commit with a gum-prompted message
 gc() {
   local files msg
