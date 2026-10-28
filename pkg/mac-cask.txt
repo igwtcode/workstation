@@ -19,10 +19,8 @@ zed
 
 # ai tools
 # @latest = rolling channel; the bare claude-code cask lags behind
-claude
 claude-code@latest
 codex
-steipete/tap/codexbar
 
 # dev environments
 devpod
@@ -36,10 +34,6 @@ zulu@17
 
 # containers
 orbstack
-
-# launcher / productivity
-#raycast
-#superwhisper
 
 # networking
 tailscale-app
