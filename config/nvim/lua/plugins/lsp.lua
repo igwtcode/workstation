@@ -19,6 +19,9 @@ return {
           },
         },
       },
+      terraformls = {
+        on_attach = function() end,
+      },
       yamlls = {
         filetypes = { "yaml", "yaml.ansible", "yaml.github", "yaml.cfn", "yaml.sam" },
       },
