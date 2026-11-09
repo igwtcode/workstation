@@ -47,21 +47,7 @@ install_flatpak_themes() {
 
 ensure_paru
 
-# --noconfirm cannot resolve conflicts, so pre-remove what pkg/arch.txt
-# replaces: jack (pipewire-jack), yq (go-yq), noctalia v4 (noctalia)
-remove_conflicts() {
-  local pkg installed found=()
-  installed=$(pacman -Qq)
-  for pkg in jack yq noctalia-shell noctalia-qs; do
-    grep -qx "$pkg" <<<"$installed" && found+=("$pkg")
-  done
-  ((${#found[@]})) || return 0
-  confirm "packages: remove ${found[*]} (conflicts with pkg/arch.txt)?" ||
-    die "conflicting packages left installed — the install would fail"
-  sudo pacman -Rdd --noconfirm "${found[@]}"
-}
-
-remove_conflicts
+"$root/os/arch/conflicts.sh"
 install_packages
 install_flatpak_themes
 

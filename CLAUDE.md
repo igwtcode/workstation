@@ -75,8 +75,9 @@ the output → `pkg/` entry per profile → sync hook if needed → verify with
   no `mapfile` in `os/mac/bootstrap.sh` or `.mise/tasks/sync`.
 - Homebrew 6: `HOMEBREW_NO_ASK=1` for unattended installs; third-party taps
   need `brew tap` + `brew trust --formula`; `--eval-all` is deprecated.
-- Arch: `jack` conflicts with `pipewire-jack`, `yq` with `go-yq` — the arch
-  bootstrap removes them first; `--noconfirm` cannot resolve conflicts.
+- Arch: `--noconfirm` cannot resolve conflicts, so `os/arch/conflicts.sh`
+  (run by bootstrap and `pkg`) removes what `pkg/arch.txt` replaces — `jack`,
+  `yq`, the v4 noctalia and old DMS packages. Add new renames there.
 - noctalia v5 is the native `noctalia` package (`noctalia msg …` IPC,
   `config.toml`); `noctalia-shell` is the dead v4 name. DMS is now
   `dux-shell`/`dux-greeter-bin`, still `dms`/`dms-greeter` binaries.

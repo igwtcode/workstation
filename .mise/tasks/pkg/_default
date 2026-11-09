@@ -165,6 +165,7 @@ update_arch() {
   else
     step "pacman cache: clear partial downloads" sudo find /var/cache/pacman/pkg -maxdepth 1 -name 'download-*' -exec rm -rf {} +
   fi
+  step "packages: remove ones pkg/arch.txt replaces" "$root/os/arch/conflicts.sh"
   step "paru: install new entries from pkg/arch.txt" install_new_arch
   step "paru: full system upgrade (repo + AUR)" paru "${args[@]}"
   if ws_has paccache; then
