@@ -64,8 +64,8 @@ machine-private: `mise.local.toml` (env vars) and `.mise/tasks/local/`
 (`local:*` tasks). `mise run secrets:push` / `secrets:pull` round-trip both;
 `op:ssh`, `op:files` and `op:envfiles` do the same for machine state.
 
-`mise.local.toml` defines `WS_ZONES`, `WS_FORGES`, `WS_OP_FILES` and
-`WS_OP_VAULT`. Their formats are documented in the file itself, which is
+`mise.local.toml` defines `WS_ZONES`, `WS_FORGES`, `WS_OP_FILES`,
+`WS_OP_VAULT` and `WS_ANDROID_AVDS`. Their formats are documented in the file itself, which is
 restored from 1Password on a new machine.
 
 ## Layout

@@ -10,7 +10,7 @@ root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 # shellcheck source=lib/common.sh
 source "$root/lib/common.sh"
 
-steps=(shell rustup docker libvirt dns tailscale gsettings)
+steps=(shell rustup docker libvirt kvm dns tailscale gsettings)
 
 step_shell() {
   local zsh_path current
@@ -56,6 +56,16 @@ step_libvirt() {
   sudo virsh net-start default >/dev/null 2>&1 || true     # already-active is fine
   if ws_has ufw; then
     sudo ufw route allow from 192.168.122.0/24
+  fi
+}
+
+# the android emulator needs /dev/kvm
+step_kvm() {
+  if id -nG "$USER" | tr ' ' '\n' | grep -qx kvm; then
+    log "kvm: $USER already in kvm group"
+  else
+    sudo usermod -aG kvm "$USER"
+    log "kvm: added $USER to kvm group (takes effect on re-login)"
   fi
 }
 

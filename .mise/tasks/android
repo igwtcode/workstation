@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+#MISE description="Install Android SDK packages from pkg/android.txt and create the AVDs listed in WS_ANDROID_AVDS"
+#USAGE flag "-y --yes" help="Skip confirmations and accept the SDK licenses"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+
+[[ ${usage_yes:-false} == true ]] && export WS_YES=1
+
+require_cmd curl unzip java
+
+case $(os_detect) in
+  mac) host=mac sdk_default=$HOME/Library/Android/sdk ;;
+  *) host=linux sdk_default=$HOME/Android/Sdk ;;
+esac
+export ANDROID_HOME=${ANDROID_HOME:-$sdk_default}
+case $(uname -m) in
+  x86_64) abi=x86_64 ;;
+  arm64 | aarch64) abi=arm64-v8a ;;
+  *) die "android: unsupported cpu $(uname -m)" ;;
+esac
+
+tools=$ANDROID_HOME/cmdline-tools/latest/bin
+avd_home=${ANDROID_AVD_HOME:-$HOME/.android/avd}
+
+sha1() {
+  if ws_has sha1sum; then sha1sum "$1"; else shasum -a 1 "$1"; fi | cut -d' ' -f1
+}
+
+install_cmdline_tools() {
+  local repo=https://dl.google.com/android/repository prefix pair sum url tmp
+  case $host-$abi in
+    linux-*) prefix=commandlinetools-linux- ;;
+    mac-arm64-v8a) prefix=commandlinetools-mac_arm64- ;;
+    mac-x86_64) prefix=commandlinetools-mac_x86_64- ;;
+  esac
+  pair=$(curl -fsSL "$repo/repository2-3.xml" | awk -v p="$prefix" '
+    /<remotePackage path="cmdline-tools;latest">/ { f = 1 }
+    f && /<\/remotePackage>/ { exit }
+    f && /<checksum/ { gsub(/.*">|<.*/, ""); sum = $0 }
+    f && /<url>/ { gsub(/.*<url>|<\/url>.*/, ""); if (index($0, p) == 1) { print sum, $0; exit } }')
+  read -r sum url <<<"$pair"
+  [[ -n ${url:-} ]] || die "android: no cmdline-tools archive for $host in the SDK repository"
+
+  tmp=$(mktemp -d)
+  # shellcheck disable=SC2064 # expand now: tmp is local
+  trap "rm -rf '$tmp'" RETURN
+  log "android: downloading $url"
+  curl -fsSL "$repo/$url" -o "$tmp/tools.zip"
+  [[ $(sha1 "$tmp/tools.zip") == "$sum" ]] || die "android: checksum mismatch for $url"
+  unzip -q "$tmp/tools.zip" -d "$tmp"
+  mkdir -p "$ANDROID_HOME/cmdline-tools"
+  mv "$tmp/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+}
+
+# set_ini <file> <key> <value>
+set_ini() {
+  if grep -q "^$2=" "$1"; then
+    sed -i.bak "s|^$2=.*|$2=$3|" "$1" && rm -f "$1.bak"
+  else
+    printf '%s=%s\n' "$2" "$3" >>"$1"
+  fi
+}
+
+pkgs=()
+while IFS= read -r line; do
+  if [[ $line == system-images\;* && $line != *";$abi" ]]; then
+    continue
+  fi
+  pkgs+=("$line")
+done < <(grep -vE '^[[:space:]]*(#|$)' "$root/pkg/android.txt")
+
+log "android: sdk ${ANDROID_HOME/#$HOME/\~} ($abi), ${#pkgs[@]} packages"
+confirm "android: install the SDK packages and accept the Android SDK licenses?"
+
+if [[ ! -x $tools/sdkmanager ]]; then
+  [[ -e $ANDROID_HOME/cmdline-tools/latest ]] &&
+    die "android: cmdline-tools/latest exists but has no sdkmanager — move it aside"
+  install_cmdline_tools
+fi
+
+{ yes || true; } | "$tools/sdkmanager" --licenses >/dev/null
+"$tools/sdkmanager" --install "${pkgs[@]}"
+
+if [[ -z ${WS_ANDROID_AVDS:-} ]]; then
+  log "android: WS_ANDROID_AVDS unset — no AVDs to create"
+  exit 0
+fi
+
+existing=$("$tools/avdmanager" list avd -c 2>/dev/null || true)
+while IFS='|' read -r name device image; do
+  [[ -z ${name//[[:space:]]/} || $name == \#* ]] && continue
+  [[ -n $device && -n $image ]] || die "malformed WS_ANDROID_AVDS line '$name|$device|$image' (expected name|device|image)"
+  if grep -qx "$name" <<<"$existing"; then
+    log "avd: $name exists"
+    continue
+  fi
+  image="$image;$abi"
+  [[ " ${pkgs[*]} " == *" $image "* ]] || "$tools/sdkmanager" --install "$image"
+  echo no | "$tools/avdmanager" create avd -n "$name" -d "$device" -k "$image" >/dev/null
+  cfg=$avd_home/$name.avd/config.ini
+  set_ini "$cfg" hw.ramSize 4096
+  set_ini "$cfg" disk.dataPartition.size 8G
+  set_ini "$cfg" hw.keyboard yes
+  set_ini "$cfg" hw.gpu.enabled yes
+  set_ini "$cfg" hw.gpu.mode host
+  log "avd: created $name ($device, $image)"
+done <<<"$WS_ANDROID_AVDS"
+
+styled 2 "android: done"

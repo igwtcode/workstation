@@ -1,0 +1,24 @@
+# Android SDK packages (sdkmanager ids), installed by `mise run android`.
+# System images are kept only for the host ABI.
+
+# build tools
+build-tools;35.0.0
+build-tools;36.0.0
+build-tools;37.0.0
+cmake;3.22.1
+ndk;27.0.12077973
+ndk;27.1.12297006
+
+# platforms
+platforms;android-36
+platforms;android-37.0
+sources;android-37.0
+
+# tools
+cmdline-tools;latest
+emulator
+platform-tools
+
+# system images
+system-images;android-36.1;google_apis_playstore_ps16k;arm64-v8a
+system-images;android-36.1;google_apis_playstore_ps16k;x86_64
