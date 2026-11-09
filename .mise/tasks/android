@@ -30,17 +30,18 @@ sha1() {
 }
 
 install_cmdline_tools() {
-  local repo=https://dl.google.com/android/repository prefix pair sum url tmp
+  local repo=https://dl.google.com/android/repository prefix xml pair sum url tmp
   case $host-$abi in
     linux-*) prefix=commandlinetools-linux- ;;
     mac-arm64-v8a) prefix=commandlinetools-mac_arm64- ;;
     mac-x86_64) prefix=commandlinetools-mac_x86_64- ;;
   esac
-  pair=$(curl -fsSL "$repo/repository2-3.xml" | awk -v p="$prefix" '
+  xml=$(curl -fsSL "$repo/repository2-3.xml")
+  pair=$(awk -v p="$prefix" '
     /<remotePackage path="cmdline-tools;latest">/ { f = 1 }
     f && /<\/remotePackage>/ { exit }
     f && /<checksum/ { gsub(/.*">|<.*/, ""); sum = $0 }
-    f && /<url>/ { gsub(/.*<url>|<\/url>.*/, ""); if (index($0, p) == 1) { print sum, $0; exit } }')
+    f && /<url>/ { gsub(/.*<url>|<\/url>.*/, ""); if (index($0, p) == 1) { print sum, $0; exit } }' <<<"$xml")
   read -r sum url <<<"$pair"
   [[ -n ${url:-} ]] || die "android: no cmdline-tools archive for $host in the SDK repository"
 
