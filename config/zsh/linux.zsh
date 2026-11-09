@@ -8,6 +8,9 @@ export ANDROID_HOME=$HOME/Android/Sdk
 export PATH=$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
 [[ -d /usr/lib/jvm/java-17-openjdk ]] && export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 
+# devpod-bin ships the CLI as devpod-cli; mac's cask calls it devpod
+(( $+commands[devpod-cli] )) && alias devpod=devpod-cli
+
 # clipboard helper used by core aliases (wayland)
 clipcopy() { wl-copy "$@" }
 
