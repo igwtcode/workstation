@@ -75,7 +75,11 @@ the output → `pkg/` entry per profile → sync hook if needed → verify with
   no `mapfile` in `os/mac/bootstrap.sh` or `.mise/tasks/sync`.
 - Homebrew 6: `HOMEBREW_NO_ASK=1` for unattended installs; third-party taps
   need `brew tap` + `brew trust --formula`; `--eval-all` is deprecated.
-- Arch: `jack` conflicts with `pipewire-jack` — remove it first.
+- Arch: `jack` conflicts with `pipewire-jack`, `yq` with `go-yq` — the arch
+  bootstrap removes them first; `--noconfirm` cannot resolve conflicts.
+- noctalia v5 is the native `noctalia` package (`noctalia msg …` IPC,
+  `config.toml`); `noctalia-shell` is the dead v4 name. DMS is now
+  `dux-shell`/`dux-greeter-bin`, still `dms`/`dms-greeter` binaries.
 - Niri includes take `optional=true`. Hyprland config is Lua since 0.55;
   validate with `Hyprland --verify-config -c`.
 - XDG vars come from `config/shell/xdg.sh` via `~/.zshenv`; only
@@ -100,5 +104,5 @@ Both compositors and both shells, picked at login. greetd + DMS greeter.
 paru/brew for global tools, mise for tasks and per-project pinning. Plain
 package lists, not Brewfile. Directory-scoped env for identity, not a second
 OS user. Zone `mise.toml` is a real file, never a symlink into this repo.
-XDG from `~/.zshenv`. `arch` covers derivatives via `ID_LIKE`. orbstack on
-mac. Secrets only in 1Password.
+XDG from `~/.zshenv`. `arch` covers derivatives via `ID_LIKE` (CachyOS by
+`ID`). orbstack on mac. Secrets only in 1Password.

@@ -47,14 +47,26 @@ install_flatpak_themes() {
 
 ensure_paru
 
-# `jack` conflicts with `pipewire-jack` (see CLAUDE.md § Traps)
-paru -Rdd --noconfirm jack >/dev/null 2>&1 || true # absent is fine
+# --noconfirm cannot resolve conflicts, so pre-remove what pkg/arch.txt
+# replaces: jack (pipewire-jack), yq (go-yq), noctalia v4 (noctalia)
+remove_conflicts() {
+  local pkg installed found=()
+  installed=$(pacman -Qq)
+  for pkg in jack yq noctalia-shell noctalia-qs; do
+    grep -qx "$pkg" <<<"$installed" && found+=("$pkg")
+  done
+  ((${#found[@]})) || return 0
+  confirm "packages: remove ${found[*]} (conflicts with pkg/arch.txt)?" ||
+    die "conflicting packages left installed — the install would fail"
+  sudo pacman -Rdd --noconfirm "${found[@]}"
+}
 
+remove_conflicts
 install_packages
 install_flatpak_themes
 
 "$root/os/arch/postinstall.sh"
 "$root/os/arch/desktop/setup.sh"
-"/os/arch/snapshots.sh" # self-skips when / is not btrfs or snapper is set up
+"$root/os/arch/snapshots.sh" # self-skips when / is not btrfs or snapper is set up
 
 log "bootstrap ($profile): OS setup done"
