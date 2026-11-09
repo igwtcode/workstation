@@ -63,4 +63,5 @@ colliding with the shared table above.
 - Privacy: telegram/keepassxc/secrets/1password windows and noctalia
   notifications blocked from screen capture on both.
 - Focus: Playwright's browsers (`chromium-browser`, `firefox-default`) open
-  without taking focus.
+  without taking focus; activation requests don't steal focus (niri default,
+  hyprland `focus_on_activate` default).
