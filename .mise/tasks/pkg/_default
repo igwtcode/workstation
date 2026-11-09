@@ -160,7 +160,11 @@ install_new_arch() {
 update_arch() {
   local args=(-Syu)
   [[ ${WS_YES:-0} == 1 ]] && args+=(--noconfirm)
-  step "pacman cache: clear partial downloads" sudo rm -f /var/cache/pacman/pkg/download-*
+  if [[ -e /var/lib/pacman/db.lck ]]; then
+    warn "pacman is locked (running elsewhere?) — skipping partial download cleanup"
+  else
+    step "pacman cache: clear partial downloads" sudo find /var/cache/pacman/pkg -maxdepth 1 -name 'download-*' -exec rm -rf {} +
+  fi
   step "paru: install new entries from pkg/arch.txt" install_new_arch
   step "paru: full system upgrade (repo + AUR)" paru "${args[@]}"
   if ws_has paccache; then
