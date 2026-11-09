@@ -71,7 +71,7 @@ os_detect() {
     # shellcheck disable=SC1091
     id_like=$(. /etc/os-release && echo "${ID_LIKE:-}")
   fi
-  if [[ $id == arch || " $id_like " == *" arch "* ]]; then
+  if [[ $id == arch || $id == cachyos || " $id_like " == *" arch "* ]]; then
     echo arch
   else
     echo linux

@@ -93,7 +93,7 @@ pick() {
 
 # os_detect — mac | arch | linux (generic: debian/ubuntu/fedora/…).
 # Arch derivatives report themselves through ID_LIKE and are treated as
-# arch; there is no per-derivative profile.
+# arch; CachyOS is matched by ID since its /etc/os-release may omit ID_LIKE.
 os_detect() {
   if [[ $(uname -s) == Darwin ]]; then
     echo mac
@@ -106,7 +106,7 @@ os_detect() {
     # shellcheck disable=SC1091
     id_like=$(. /etc/os-release && echo "${ID_LIKE:-}")
   fi
-  if [[ $id == arch || " $id_like " == *" arch "* ]]; then
+  if [[ $id == arch || $id == cachyos || " $id_like " == *" arch "* ]]; then
     echo arch
   else
     echo linux
