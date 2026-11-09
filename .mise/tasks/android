@@ -9,7 +9,9 @@ source "$root/lib/common.sh"
 
 [[ ${usage_yes:-false} == true ]] && export WS_YES=1
 
-require_cmd curl unzip java
+require_cmd curl unzip
+# macOS ships a /usr/bin/java stub even without a JDK
+java -version >/dev/null 2>&1 || die "android: no working JDK (jdk17-openjdk on arch, zulu@17 on mac)"
 
 case $(os_detect) in
   mac) host=mac sdk_default=$HOME/Library/Android/sdk ;;
@@ -23,14 +25,16 @@ case $(uname -m) in
 esac
 
 tools=$ANDROID_HOME/cmdline-tools/latest/bin
-avd_home=${ANDROID_AVD_HOME:-$HOME/.android/avd}
+avd_home=${ANDROID_AVD_HOME:-${ANDROID_USER_HOME:-$HOME/.android}/avd}
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
 
 sha1() {
   if ws_has sha1sum; then sha1sum "$1"; else shasum -a 1 "$1"; fi | cut -d' ' -f1
 }
 
 install_cmdline_tools() {
-  local repo=https://dl.google.com/android/repository prefix xml pair sum url tmp
+  local repo=https://dl.google.com/android/repository prefix xml pair sum url
   case $host-$abi in
     linux-*) prefix=commandlinetools-linux- ;;
     mac-arm64-v8a) prefix=commandlinetools-mac_arm64- ;;
@@ -45,9 +49,6 @@ install_cmdline_tools() {
   read -r sum url <<<"$pair"
   [[ -n ${url:-} ]] || die "android: no cmdline-tools archive for $host in the SDK repository"
 
-  tmp=$(mktemp -d)
-  # shellcheck disable=SC2064 # expand now: tmp is local
-  trap "rm -rf '$tmp'" RETURN
   log "android: downloading $url"
   curl -fsSL "$repo/$url" -o "$tmp/tools.zip"
   [[ $(sha1 "$tmp/tools.zip") == "$sum" ]] || die "android: checksum mismatch for $url"
@@ -82,6 +83,7 @@ if [[ ! -x $tools/sdkmanager ]]; then
   install_cmdline_tools
 fi
 
+# yes dies of SIGPIPE once sdkmanager stops reading
 { yes || true; } | "$tools/sdkmanager" --licenses >/dev/null
 "$tools/sdkmanager" --install "${pkgs[@]}"
 
