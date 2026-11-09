@@ -103,10 +103,6 @@ hotkey-overlay {
   skip-at-startup
 }
 
-debug {
-  honor-xdg-activation-with-invalid-serial
-}
-
 binds {
   // Applications
   Mod+Return { spawn "ghostty"; }
@@ -250,6 +246,12 @@ window-rule {
   match app-id="^xdg-desktop-portal$"
   open-floating false
 }
+// Playwright's browsers steal focus on every run; daily browsers keep it
+window-rule {
+  match app-id="^chromium-browser$"
+  match app-id="^firefox-default$"
+  open-focused false
+}
 window-rule {
   match app-id="^steam$" title="^notificationtoasts_\\d+_desktop$"
   default-floating-position x=10 y=10 relative-to="bottom-right"
@@ -287,15 +289,15 @@ window-rule {
 }
 
 layer-rule {
-  match namespace="^noctalia-wallpaper*"
+  match namespace="^noctalia-wallpaper$"
   place-within-backdrop true
 }
 layer-rule {
-  match namespace="^noctalia-notifications"
+  match namespace="^noctalia-notification$"
   block-out-from "screencast"
 }
 layer-rule {
-  match namespace="^noctalia-notifications"
+  match namespace="^noctalia-notification$"
   block-out-from "screen-capture"
 }
 

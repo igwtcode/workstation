@@ -23,7 +23,7 @@ EOF
 
 shell=${WS_SHELL:-}
 if [[ -z $shell ]]; then
-  if pgrep -f noctalia-shell >/dev/null 2>&1; then
+  if pgrep -x noctalia >/dev/null 2>&1; then
     shell=noctalia
   elif pgrep -f 'dms(-shell| run)' >/dev/null 2>&1; then
     shell=dms
@@ -32,7 +32,7 @@ if [[ -z $shell ]]; then
   fi
 fi
 
-noctalia() { exec qs -c noctalia-shell ipc call "$@"; }
+noc() { exec noctalia msg "$@"; }
 dank() { exec dms ipc call "$@"; }
 
 if [[ $shell == dms ]]; then
@@ -54,19 +54,19 @@ if [[ $shell == dms ]]; then
   esac
 else
   case $verb in
-    launcher) noctalia launcher toggle ;;
-    control-center) noctalia controlCenter toggle ;;
-    settings) noctalia settings toggle ;;
-    lock) noctalia sessionMenu lock ;;
-    volume-up) noctalia volume increase ;;
-    volume-down) noctalia volume decrease ;;
-    volume-mute) noctalia volume muteOutput ;;
-    mic-mute) noctalia volume muteInput ;;
-    media-next) noctalia media next ;;
-    media-prev) noctalia media previous ;;
-    media-play-pause) noctalia media playPause ;;
-    brightness-up) noctalia brightness increase ;;
-    brightness-down) noctalia brightness decrease ;;
+    launcher) noc panel-toggle launcher ;;
+    control-center) noc panel-toggle control-center ;;
+    settings) noc settings-toggle ;;
+    lock) noc session lock ;;
+    volume-up) noc volume-up ;;
+    volume-down) noc volume-down ;;
+    volume-mute) noc volume-mute ;;
+    mic-mute) noc mic-mute ;;
+    media-next) noc media next ;;
+    media-prev) noc media previous ;;
+    media-play-pause) noc media toggle ;;
+    brightness-up) noc brightness-up ;;
+    brightness-down) noc brightness-down ;;
     *) usage ;;
   esac
 fi

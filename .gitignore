@@ -22,6 +22,7 @@ config/hypr/local.lua
 config/niri/noctalia.kdl
 config/noctalia/*
 !config/noctalia/settings.json
+!config/noctalia/config.toml
 config/nvim/lazy-lock.json.bak
 config/tmux/plugins/
 config/gh/hosts*

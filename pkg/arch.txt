@@ -132,14 +132,14 @@ wireplumber
 ufw
 
 # wayland desktop — compositors, shells, greeter
-dms-shell
+dux-greeter-bin
+dux-shell
 greetd
-greetd-dms-greeter-bin
 grim
 hyprland
 hyprshot
 niri
-noctalia-shell
+noctalia
 polkit-gnome
 qt5-wayland
 qt6-svg

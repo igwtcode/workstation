@@ -7,5 +7,5 @@ set -euo pipefail
 
 case ${WS_SHELL:-noctalia} in
   dms) exec dms run ;;
-  *) exec qs -c noctalia-shell ;;
+  *) exec noctalia ;;
 esac

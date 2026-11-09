@@ -197,10 +197,23 @@ hl.window_rule({
   float = true,
 })
 
+-- Playwright's browsers steal focus on every run; daily browsers keep it
+hl.window_rule({
+  name = "no-focus-automation-browsers",
+  match = { class = "^(chromium-browser|firefox-default)$" },
+  no_initial_focus = true,
+})
+
 -- Privacy: keep credential/messaging windows out of screen shares
 hl.window_rule({
   name = "no-screenshare-private",
   match = { class = "^(org\\.telegram\\.desktop|org\\.keepassxc\\.KeePassXC|org\\.gnome\\.World\\.Secrets|1password)$" },
+  no_screen_share = true,
+})
+
+hl.layer_rule({
+  name = "no-screenshare-notifications",
+  match = { namespace = "^noctalia-notification$" },
   no_screen_share = true,
 })
 

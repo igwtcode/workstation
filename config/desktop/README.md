@@ -59,5 +59,7 @@ colliding with the shared table above.
 - Cursor: capitaine-cursors, size 36, hide while typing / after 3s idle.
 - Screenshot tooling: built-in on niri; `hyprshot` on hyprland (pkg list
   must carry it for the arch profile).
-- Privacy: telegram/keepassxc/secrets/1password blocked from screen
-  capture on both.
+- Privacy: telegram/keepassxc/secrets/1password windows and noctalia
+  notifications blocked from screen capture on both.
+- Focus: Playwright's browsers (`chromium-browser`, `firefox-default`) open
+  without taking focus.
