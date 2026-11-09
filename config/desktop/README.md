@@ -52,7 +52,8 @@ colliding with the shared table above.
 
 ## Shared behavior
 
-- Workspaces: 9, numbered; windows open tiled; no gaps, no borders/rounding
+- Workspaces: 9, numbered; windows open tiled; 6px gaps between windows,
+  none at screen edges; no borders/rounding
   (shell provides visual focus cues).
 - Keyboard: `us,de` layouts, repeat rate 60, repeat delay 240.
 - Touchpad: tap-to-click, natural scroll; focus follows mouse.

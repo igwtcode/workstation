@@ -44,10 +44,10 @@ hl.env("HYPRCURSOR_SIZE", "36")
 ---- LOOK AND FEEL -----
 ------------------------
 
--- No gaps, borders, rounding, shadows or blur — matches the niri layout
+-- Gaps only between windows (3 per side = 6 like niri); no borders, rounding, shadows or blur
 hl.config({
   general = {
-    gaps_in = 0,
+    gaps_in = 3,
     gaps_out = 0,
     border_size = 0,
     resize_on_border = false,

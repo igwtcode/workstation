@@ -54,7 +54,7 @@ cursor {
 }
 
 layout {
-  gaps 0
+  gaps 6
   background-color "transparent"
   center-focused-column "never"
   preset-column-widths {
@@ -74,7 +74,12 @@ layout {
     off
     width 1.5
   }
+  // negative struts cancel the outer gaps: gaps only between windows
   struts {
+    left -6
+    right -6
+    top -6
+    bottom -6
   }
 }
 
