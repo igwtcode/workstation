@@ -1,0 +1,105 @@
+[theme]
+mode = "dark"
+source = "builtin"
+builtin = "Gruvbox"
+
+# btop is left out: its template rewrites the tracked btop.conf
+[theme.templates]
+enable_builtin_templates = true
+builtin_ids = ["niri", "qt", "gtk3", "gtk4", "cava"]
+enable_community_templates = true
+community_ids = ["pywalfox", "telegram", "vscode", "zed", "zathura"]
+
+[wallpaper]
+fill_mode = "crop"
+directory = "~/Pictures/Wallpapers"
+
+[bar.main]
+position = "bottom"
+auto_hide = true
+auto_hide_delay_ms = 500
+show_on_workspace_switch = true
+reserve_space = false
+thickness = 36
+background_opacity = 0.3
+compositor_blur = false
+shadow = false
+radius = 0
+margin_ends = 0
+margin_edge = 0
+padding = 8
+widget_spacing = 6
+font_family = "GeistMono NFP"
+capsule = true
+capsule_fill = "surface_container"
+capsule_opacity = 0.95
+capsule_padding = 8
+capsule_thickness = 0.8
+start = ["launcher", "workspaces", "tray"]
+center = ["clock"]
+end = ["group:sysmon", "group:status", "notifications", "control-center"]
+
+[[bar.main.capsule_group]]
+id = "sysmon"
+members = ["cpu", "temp", "ram"]
+fill = "surface_container"
+opacity = 0.95
+padding = 10
+widget_spacing = 12
+
+[[bar.main.capsule_group]]
+id = "status"
+members = ["volume", "brightness", "keyboard_layout", "power_profile", "battery"]
+fill = "surface_container"
+opacity = 0.95
+padding = 10
+widget_spacing = 12
+
+[widget.launcher]
+glyph = "rocket"
+
+[widget.workspaces]
+style = "regular"
+label_source = "id"
+labels_only_when_occupied = true
+
+[widget.tray]
+drawer = false
+hide_passive = true
+
+[widget.clock]
+format = "{:%H:%M  %a %b %d}"
+tooltip_format = "{:%A, %B %d, %Y}"
+font_weight = 600
+
+[widget.cpu]
+type = "sysmon"
+stat = "cpu_usage"
+visualization = "none"
+label_min_width = 34
+
+[widget.temp]
+type = "sysmon"
+stat = "cpu_temp"
+visualization = "none"
+label_min_width = 34
+
+[widget.ram]
+type = "sysmon"
+stat = "ram_used"
+visualization = "none"
+label_min_width = 52
+
+[widget.volume]
+show_label = false
+
+[widget.brightness]
+show_label = false
+
+[widget.keyboard_layout]
+show_glyph = false
+display = "short"
+
+[widget.battery]
+display_mode = "graphic"
+show_label = true

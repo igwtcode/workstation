@@ -240,6 +240,7 @@ uv
 # python libraries
 python-boto3
 python-cfn-lint
+python-pywalfox
 python-yaml
 
 # ai tools
