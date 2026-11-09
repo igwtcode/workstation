@@ -230,6 +230,10 @@ gg() { goto_repodir "" "$1" }
 zw() { cd ${1:+$HOME/work/code/}${1:-$HOME/work} }
 zp() { cd ${1:+$HOME/personal/code/}${1:-$HOME/personal} }
 
+# workstation tasks from any directory: `ws` lists them, `ws update` runs one
+_ws_repo=${${:-$HOME/.zshrc}:A:h:h:h}
+ws() { if (( $# )); then mise -C $_ws_repo run "$@"; else mise -C $_ws_repo tasks; fi }
+
 # Pick an AWS profile from *every* zone's files, active zone first, so a
 # work profile is reachable from the personal zone. The zone column is only
 # there to pick and filter by; the bare profile name is what gets printed.

@@ -14,7 +14,8 @@ mise, clones to `~/personal/code/igwtcode/workstation` (`WS_DIR` to
 override), then runs `mise run bootstrap`. Re-running is safe. `--yes` skips
 confirmations.
 
-`mise tasks` lists every entry point.
+`mise tasks` lists every entry point; from any directory, the zsh helper
+`ws` lists them and `ws <task>` runs one.
 
 ## How it works
 
