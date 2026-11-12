@@ -36,7 +36,6 @@ zulu@17
 orbstack
 
 # networking
-tailscale-app
 windows-app
 
 # communication

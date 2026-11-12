@@ -42,6 +42,7 @@ yt-dlp
 zoxide
 
 # networking
+tailscale
 wireguard-tools
 
 # security & passwords

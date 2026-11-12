@@ -133,10 +133,26 @@ install_list "$root/pkg/mac-cask.txt" --cask
 
 setup_rustup
 
-# tailscale-app carries the tunnel in a system extension approved once by hand.
-if ! pgrep -qf io.tailscale.ipn.macsys.network-extension; then
-  warn "tailscale: system extension not running — open Tailscale.app once and approve it"
-fi
+# Only the open-source tailscaled can serve Tailscale SSH on macOS; it runs as
+# a root launch daemon and cannot coexist with Tailscale.app.
+setup_tailscale() {
+  if [[ -d /Applications/Tailscale.app ]]; then
+    warn "tailscale: Tailscale.app is installed — remove it (and reboot), it conflicts with tailscaled"
+  fi
+  sudo "$HOMEBREW_PREFIX/bin/brew" services start tailscale
+  if tailscale status >/dev/null 2>&1; then
+    log "tailscale: already up"
+    return 0
+  fi
+  # `tailscale up` blocks on browser auth — only offer it interactively
+  if [[ -t 0 && -t 2 ]] && confirm "tailscale: run 'tailscale up --ssh' now (opens a login URL)?"; then
+    tailscale up --ssh
+  else
+    warn "tailscale: not logged in — run 'tailscale up --ssh' when ready"
+  fi
+}
+
+setup_tailscale
 
 "$root/os/mac/defaults.sh"
 
