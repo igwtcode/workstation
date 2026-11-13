@@ -38,6 +38,16 @@ step() {
 
 # --- mac --------------------------------------------------------------------
 
+# restart_stale_tailscaled <restart-cmd...> — a package upgrade replaces the
+# binary but leaves the old daemon running
+restart_stale_tailscaled() {
+  ws_has tailscale || return 0
+  local json
+  json=$(tailscale version --daemon --json 2>/dev/null) || return 0
+  [[ $(jq -r .long <<<"$json") == "$(jq -r .daemonLong <<<"$json")" ]] && return 0
+  "$@"
+}
+
 # list_new <file> <installed-cmd...> — pkg-list entries not yet installed
 list_new() {
   local file=$1
@@ -126,6 +136,8 @@ update_mac() {
     desc+=" (greedy — includes self-updating casks)"
   fi
   step "$desc" brew "${args[@]}"
+  step "tailscale: restart daemon if older than the CLI" \
+    restart_stale_tailscaled sudo "$(command -v brew)" services restart tailscale
   # autoremove first: dropping unused deps makes cleanup's work smaller
   step "brew: remove no-longer-needed dependencies" brew autoremove
   step "brew: clean stale downloads and old versions" brew cleanup --prune=all
@@ -168,6 +180,8 @@ update_arch() {
   step "packages: remove ones pkg/arch.txt replaces" "$root/os/arch/conflicts.sh"
   step "paru: install new entries from pkg/arch.txt" install_new_arch
   step "paru: full system upgrade (repo + AUR)" paru "${args[@]}"
+  step "tailscale: restart daemon if older than the CLI" \
+    restart_stale_tailscaled sudo systemctl restart tailscaled.service
   if ws_has paccache; then
     step "paccache: keep 2 recent versions of installed packages" sudo paccache -rk2
     step "paccache: drop cached versions of uninstalled packages" sudo paccache -ruk0
