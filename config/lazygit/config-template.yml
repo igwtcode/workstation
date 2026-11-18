@@ -7,16 +7,15 @@
 # Defaults cover those options; only theme colors live here.
 git:
   log:
-    showWholeGraph: true
+    showWholeGraph: false
     showGraph: when-maximised
   allBranchesLogCmds:
-    - git log --graph --color=always --abbrev-commit --decorate --date=local --pretty=medium --
+    - git log --graph --exclude='refs/t3/*' --all --color=always --abbrev-commit --decorate --date=local --pretty=medium --
   diffRenderers:
     # delta picks its colors up from the rendered git config ([delta] section)
     - colorArg: always
       command: delta --paging=never --tabs=2
 gui:
-  useHunkModeInStagingView: false
   timeFormat: 01/02 15:04:05
   shortTimeFormat: "Today 15:04:05"
   nerdFontsVersion: "3"
@@ -24,8 +23,6 @@ gui:
   showDivergenceFromBaseBranch: arrowAndNumber
   showFileIcons: false
   sidePanelWidth: 0.16
-  authorColors:
-    "*": "{{color4}}"
   theme:
     activeBorderColor:
       - "{{accent}}"
