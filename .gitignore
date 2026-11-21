@@ -30,6 +30,7 @@ config/gh/state*
 config/herdr/*
 !config/herdr/config-template.toml
 !config/herdr/nvim-nav.sh
+config/herdr-app/themes/colors.json
 config/k9s/clusters/
 config/lazygit/state.yml
 config/btop/btop.log

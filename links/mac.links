@@ -21,6 +21,7 @@ config/gh-dash/config.yml ~/.config/gh-dash/config.yml
 
 # CLI tools beyond the server profile
 config/herdr ~/.config/herdr
+config/herdr-app/themes/colors.json ~/.config/herdr-app/themes/colors.json
 config/claude ~/.config/ws/claude
 config/lazygit ~/.config/lazygit
 config/lazydocker ~/.config/lazydocker
