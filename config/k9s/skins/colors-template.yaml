@@ -50,8 +50,8 @@ k9s:
     table:
       fgColor: "{{fg}}"
       bgColor: default
-      cursorFgColor: "{{selection_fg}}"
-      cursorBgColor: "{{selection_bg}}"
+      cursorFgColor: "{{bg}}"
+      cursorBgColor: "{{fg}}"
       markColor: "{{color3}}"
       header:
         fgColor: "{{color5}}"
