@@ -1,0 +1,9 @@
+{
+  "place": "none",
+  "title": "scratch",
+  "overlay": {
+    "kind": "popup",
+    "width": 1,
+    "height": 1
+  }
+}

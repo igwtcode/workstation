@@ -31,6 +31,8 @@ config/herdr/*
 !config/herdr/config-template.toml
 !config/herdr/nvim-nav.sh
 config/herdr-app/themes/colors.json
+config/herdr-app/mods/*/gpui-kit.d.ts
+config/herdr-app/mods/*/jsconfig.json
 config/k9s/clusters/
 config/lazygit/state.yml
 config/btop/btop.log
