@@ -22,6 +22,7 @@ config/gh-dash/config.yml ~/.config/gh-dash/config.yml
 # CLI tools beyond the server profile
 config/herdr ~/.config/herdr
 config/herdr-app/themes/colors.json ~/.config/herdr-app/themes/colors.json
+config/herdr-app/keys.json ~/.config/herdr-app/keys.json
 config/herdr-app/mods/popup-lazygit ~/.config/herdr-app/mods/popup-lazygit
 config/herdr-app/mods/popup-scratch ~/.config/herdr-app/mods/popup-scratch
 config/claude ~/.config/ws/claude
