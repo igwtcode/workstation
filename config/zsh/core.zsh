@@ -65,8 +65,6 @@ export WS_CODE_ROOT=${WS_CODE_ROOT:-$HOME}
 # starship's own default is ~/.config/starship.toml, not a starship/ dir
 export STARSHIP_CONFIG=$XDG_CONFIG_HOME/starship/config.toml
 export TF_PLUGIN_CACHE_DIR=$XDG_CACHE_HOME/terraform-plugins
-export SAM_CLI_TELEMETRY=0
-export TANSTACK_CLI_TELEMETRY_DISABLED=1
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin
 

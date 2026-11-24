@@ -8,7 +8,6 @@ _ws_cached /opt/homebrew/bin/brew shellenv zsh
 
 export PATH=$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/grep/libexec/gnubin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$PATH
 
-export HOMEBREW_NO_ANALYTICS=1
 export HOMEBREW_NO_AUTO_UPDATE=1
 
 # brew's rustup is keg-only — the rustup command itself isn't linked into
