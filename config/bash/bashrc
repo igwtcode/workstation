@@ -9,6 +9,10 @@ if [[ -r ~/.config/shell/xdg.sh ]]; then
   # shellcheck source=config/shell/xdg.sh
   source ~/.config/shell/xdg.sh
 fi
+if [[ -r ~/.config/shell/telemetry.sh ]]; then
+  # shellcheck source=config/shell/telemetry.sh
+  source ~/.config/shell/telemetry.sh
+fi
 
 [[ $- != *i* ]] && return
 

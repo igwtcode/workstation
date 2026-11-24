@@ -15,5 +15,7 @@ _ws_zdir=${${:-$HOME/.zshenv}:A:h}
 
 # shellcheck source=config/shell/xdg.sh
 source "$_ws_zdir/../shell/xdg.sh"
+# shellcheck source=config/shell/telemetry.sh
+source "$_ws_zdir/../shell/telemetry.sh"
 
 unset _ws_zdir
