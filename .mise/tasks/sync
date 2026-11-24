@@ -48,6 +48,59 @@ _install_gh_dash() {
   gh extension install dlvhdr/gh-dash
 }
 
+_go_telemetry_off() { go telemetry off; }
+
+_codex_configs() {
+  local d
+  for d in "${CODEX_HOME:-}" "$HOME/.codex" "$HOME"/.codex-*; do
+    [[ -n $d && -f $d/config.toml ]] && printf '%s\n' "$d/config.toml"
+  done | sort -u
+}
+
+# rewrites only the [analytics] table, or appends it; a dotted or inline
+# `analytics` key is left for a human
+_codex_analytics_rewrite() {
+  awk '
+    /^[[:space:]]*\[/ {
+      in_a = ($0 ~ /^[[:space:]]*\[analytics\][[:space:]]*(#.*)?$/)
+      print
+      if (in_a) { print "enabled = false"; seen = 1 }
+      next
+    }
+    in_a && /^[[:space:]]*enabled[[:space:]]*=/ { next }
+    { print }
+    END { if (!seen) printf "%s[analytics]\nenabled = false\n", (NR ? "\n" : "") }
+  ' "$1"
+}
+
+_codex_analytics_pending() {
+  local f
+  while IFS= read -r f; do
+    grep -Eq '^[[:space:]]*analytics[[:space:]]*[.=]' "$f" && continue
+    cmp -s "$f" <(_codex_analytics_rewrite "$f") || printf '%s\n' "$f"
+  done < <(_codex_configs)
+}
+
+_codex_analytics_off() {
+  local f tmp yq
+  yq=$(command -v go-yq || command -v yq) || {
+    warn "codex: no yq to validate config.toml, skipped"
+    return 0
+  }
+  while IFS= read -r f; do
+    tmp=$(mktemp "$f.XXXXXX")
+    _codex_analytics_rewrite "$f" >"$tmp"
+    if [[ $("$yq" -p toml -o json '.analytics.enabled' "$tmp" 2>/dev/null) != false ]]; then
+      rm -f "$tmp"
+      warn "codex: $f did not validate, left unchanged"
+      continue
+    fi
+    cp -p "$f" "$f.pre-ws"
+    cat "$tmp" >"$f"
+    rm -f "$tmp"
+  done < <(_codex_analytics_pending)
+}
+
 # Some tools hardcode ~/.aws/credentials and ignore the per-zone
 # AWS_SHARED_CREDENTIALS_FILE. Point the default at one zone's file so they
 # resolve; relative target so it survives the tree moving. Only ever created
@@ -67,6 +120,14 @@ post_sync_hooks() {
 
   if ws_has gh; then
     hook "install the gh-dash extension" _install_gh_dash
+  fi
+
+  if ws_has go && [[ $(go telemetry) != off ]]; then
+    hook "turn go telemetry off" _go_telemetry_off
+  fi
+
+  if [[ -n $(_codex_analytics_pending) ]]; then
+    hook "turn codex analytics off" _codex_analytics_off
   fi
 
   # the zone name lands in a path, so hold it to the same shape zone.sh does
