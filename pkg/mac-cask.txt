@@ -19,6 +19,7 @@ zed
 
 # ai tools
 # @latest = rolling channel; the bare claude-code cask lags behind
+antigravity-cli
 claude-code@latest
 codex
 
@@ -42,6 +43,9 @@ windows-app
 microsoft-outlook
 microsoft-teams
 telegram
+
+# voice dictation
+anomalyco/tap/hex
 
 # fonts
 font-caskaydia-cove-nerd-font
