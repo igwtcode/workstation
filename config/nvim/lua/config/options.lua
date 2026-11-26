@@ -19,6 +19,5 @@ opt.conceallevel = 0
 vim.g.root_spec = { "cwd", { ".git", "lua" } }
 -- vim.g.root_spec = { ".git", "cwd" }
 
----- Enable this option to avoid conflicts with Prettier.
-vim.g.lazyvim_prettier_needs_config = true
+vim.g.lazyvim_prettier_needs_config = false
 vim.g.base16_transparent_background = 1

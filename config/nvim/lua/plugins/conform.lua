@@ -34,6 +34,7 @@ return {
       ---@type table<string, conform.FormatterConfigOverride|fun(bufnr: integer): nil|conform.FormatterConfigOverride>
       formatters = {
         biome = {
+          require_cwd = true,
           command = "biome",
           args = {
             "check",
