@@ -35,9 +35,9 @@ local file: `config/niri/local.kdl`, `config/hypr/local.lua`.
 | `Mod+H/J/K/L`, `Mod+Arrows` | focus window/column in direction |
 | `Mod+Ctrl+H/J/K/L`, `Mod+Ctrl+Arrows` | move window/column in direction |
 | `Mod+Shift+Arrows` | focus monitor in direction |
-| `Mod+Shift+Ctrl+Arrows` | move window to monitor in direction |
+| `Mod+Shift+Ctrl+Arrows` | move window/column to monitor in direction |
 | `Mod+1..9` | focus workspace N |
-| `Mod+Ctrl+1..9` | move window to workspace N |
+| `Mod+Ctrl+1..9` | move window/column to workspace N |
 | `Mod+Tab` | previous workspace |
 | `Mod+Minus/Equal` | shrink/grow window horizontally |
 | `Mod+Shift+Minus/Equal` | shrink/grow window vertically |
@@ -46,9 +46,13 @@ local file: `config/niri/local.kdl`, `config/hypr/local.lua`.
 | `Mod+T` | toggle floating |
 | `Ctrl+Alt+Delete` | quit compositor |
 
-Compositor-specific extras (no counterpart expected): niri column handling
-(`Mod+R/C/W/O`, consume/expel), hyprland grouping — keep them from
-colliding with the shared table above.
+Compositor-specific extras (no counterpart expected): niri column and
+layout handling (`Mod+R`, `Mod+C`/`Mod+Ctrl+C`, `Mod+W`, `Mod+O` overview,
+`Mod+[`/`Mod+]` consume/expel, `Mod+(Ctrl+)Home/End`,
+`Mod+(Ctrl+)Page_Up/Down`, `Mod+Shift+Escape`, `Mod+Shift+P`,
+`Mod+Shift+Ctrl+T`); hyprland mouse move/resize (`Mod+LMB`/`Mod+RMB`) and a
+3-finger workspace swipe — keep them from colliding with the shared table
+above.
 
 ## Shared behavior
 
@@ -63,5 +67,6 @@ colliding with the shared table above.
 - Privacy: telegram/keepassxc/secrets/1password windows and noctalia
   notifications blocked from screen capture on both.
 - Focus: Playwright's browsers (`chromium-browser`, `firefox-default`) open
-  without taking focus; activation requests don't steal focus (niri default,
-  hyprland `focus_on_activate` default).
+  without taking focus; activation requests follow each compositor's
+  default (niri honors only valid activation tokens, hyprland leaves
+  `focus_on_activate` off).

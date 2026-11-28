@@ -2,7 +2,8 @@
 
 Static color palettes for the terminal-scope theme system. `ws theme` / `ws apply`
 (or the `mise run theme` shim) render every template listed in
-[`registry`](registry) against one palette and run the template's post-hook. See
+[`registry`](registry) against one palette and run each changed template's
+post-hook (identical hooks run once). See
 `CLAUDE.md` § Architecture.
 
 ## Layout
@@ -12,21 +13,23 @@ themes/<name>/dark.toml    # one palette per mode
 themes/<name>/light.toml   # only where upstream defines a light variant
 ```
 
-The theme id is `<name>-<mode>` (e.g. `gruvbox-dark`) — `<name>` must not
-contain `-`.
+The theme id is `<name>-<mode>` (e.g. `gruvbox-dark`). Keep `<name>` free of
+`-` by convention; the loader splits the id on its last `-`.
 
 ## Palette file format
 
-Flat TOML, trivially parseable from bash — every line is either a `#`
-comment, blank, or `key = "value"` (double quotes, no tables, no arrays).
-Color values are lowercase `#rrggbb`.
+Flat TOML, parsed strictly by `ws` (unknown keys rejected) — every line is
+either a `#` comment, blank, or `key = "value"` (double quotes, no tables, no
+arrays). Color values are lowercase `#rrggbb`; an empty value counts as
+missing.
 
 ## Token vocabulary (the contract)
 
 Every palette must define **all** of these keys; every template may use
-**only** these (plus the derived `_strip` forms). Adding a token to a
-template means adding it to `RequiredThemeTokens` in
-`ws/internal/config/themes.go` and every palette file in the same change.
+**only** these (plus the derived `_strip` forms). Adding a token means
+adding it to `RequiredThemeTokens`, the `paletteFile` struct and its
+`toMap()` in `ws/internal/config/themes.go`, and every palette file, in the
+same change.
 
 | Token | Meaning |
 | --- | --- |
@@ -42,8 +45,8 @@ template means adding it to `RequiredThemeTokens` in
 
 ## Template token formats
 
-Templates use plain `{{token}}` substitution — **no filters, pipes, or
-logic** (the renderer supports none, by design):
+Templates use plain `{{token}}` substitution — **no filters, pipes, logic,
+or whitespace inside the braces** (the renderer supports none, by design):
 
 - `{{bg}}` → `#282828`
 - `{{bg_strip}}` → `282828` (derived automatically for every `#rrggbb`

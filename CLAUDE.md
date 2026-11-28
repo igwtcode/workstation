@@ -27,9 +27,10 @@ mise (`.mise/tasks/`) keeps `ws:install`, `check`, and thin shims that exec
   `linux`/`mac`/`server`); `ws apply` (or `mise run sync`) applies it, renders
   theme templates, and runs post-sync hooks. The repo is live, so apps write
   generated files back into it — gitignore every one.
-- **Theming** — one `colors-template.*` per app, plain `{{token}}`
-  substitution, static palettes in `themes/`, rendered by `ws theme` /
-  `ws apply`. Terminal scope only.
+- **Theming** — one template per app (`colors-template.*`, or
+  `config-template.*` when the whole config is themed), listed in
+  `themes/registry`; plain `{{token}}` substitution, static palettes in
+  `themes/`, rendered by `ws theme` / `ws apply`. Terminal scope only.
 - **Desktop (arch)** — niri + hyprland × noctalia + DMS, one greetd session
   per combination. Keep the compositor configs at parity.
 - **Packages** — paru/brew own global tools, rolling; `ws bootstrap`,
@@ -77,9 +78,10 @@ config/<app>/    dotfiles               config/identity/  per-zone mise seeds
 ## Adding a tool
 
 Verify its current config path → `config/<tool>/` → `links/` entry → if
-themeable, `colors-template.*` + registry entry + all palettes + gitignore
-the output → `pkg/` entry per profile → sync hook if needed → verify with
-`mise run check`, `go test -race ./...`, and `ws apply --dry-run`.
+themeable, `colors-template.*` (or `config-template.*`) + registry entry +
+all palettes + gitignore the output → `pkg/` entry per profile → sync hook if
+needed → verify with `mise run check`, `go test -race ./...`, and
+`ws apply --dry-run`.
 
 ## Traps
 

@@ -14,7 +14,8 @@ Check every pairing:
    `links/` layer; no manifest entry pointing at a missing repo path; no
    app linked in a profile whose pkg list doesn't install it.
 2. **Templates ↔ palettes**: collect all `{{…}}` tokens across
-   `config/**/colors-template.*` and template-suffixed configs; every token
+   every template in `themes/registry` (`colors-template.*` and
+   `config-template.*`); every token
    must exist in EVERY `themes/*/` palette (all modes the theme ships) and
    match `RequiredThemeTokens` in `ws/internal/config/themes.go`. Flag
    filters/pipes in templates (forbidden) and tokens missing from the palette
