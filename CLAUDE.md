@@ -1,47 +1,62 @@
 # workstation
 
-Bootstrap + dotfiles + theming for macOS, Arch Linux, and a minimal server
-profile. Task runner is mise (`.mise/tasks/`); `mise run check` lints all
-shell.
+Bootstrap + dotfiles + theming + Go CLI/TUI (`ws`) for macOS, Arch Linux, and a
+minimal server profile. Machine setup and daily workflows run through `ws`;
+mise (`.mise/tasks/`) keeps `ws:install`, `check`, and thin shims that exec
+`ws`. `mise run check` lints all shell, and `cd ws && go vet ./... && go test -race ./...` verifies Go.
 
 ## Rules
 
 1. **Verify, never assume.** Check current docs (Context7, then web) before
    scripting any tool's behavior — flags, paths and defaults change fast.
-2. **These scripts mutate machines.** Never run bootstrap/sync/update/os
-   tasks while developing. Dev loop is `bash -n`, `mise run check`,
-   `--dry-run`. Real runs only when asked, on the machine meant.
+2. **These scripts and `ws` commands mutate machines.** Never run
+   bootstrap/sync/update/os tasks or mutating `ws` commands while developing.
+   Dev loop is `bash -n`, `mise run check`, `go vet ./...`,
+   `go test -race ./...`, and `ws --dry-run` / `ws diff`. Real runs only when
+   asked, on the machine meant.
 3. **Public repo.** No personal or machine-local content (paths, usernames,
    hostnames, accounts) in files or commit messages, and no mention of AI
    assistance. Keep comments minimal.
 4. **Never delete files without asking.** Destructive steps need
-   `gum confirm` or `--yes`.
+   confirmation, `--execute`, or `--yes`.
 5. **Ask before committing.**
 
 ## Architecture
 
 - **Deploy** — `links/` maps repo paths into `$HOME` (`common` + one of
-  `linux`/`mac`/`server`); `mise run sync` applies it. The repo is live, so
-  apps write generated files back into it — gitignore every one.
+  `linux`/`mac`/`server`); `ws apply` (or `mise run sync`) applies it, renders
+  theme templates, and runs post-sync hooks. The repo is live, so apps write
+  generated files back into it — gitignore every one.
 - **Theming** — one `colors-template.*` per app, plain `{{token}}`
-  substitution, static palettes in `themes/`. Terminal scope only.
+  substitution, static palettes in `themes/`, rendered by `ws theme` /
+  `ws apply`. Terminal scope only.
 - **Desktop (arch)** — niri + hyprland × noctalia + DMS, one greetd session
   per combination. Keep the compositor configs at parity.
-- **Packages** — paru/brew own global tools, rolling. Lists in `pkg/`.
+- **Packages** — paru/brew own global tools, rolling; `ws bootstrap`,
+  `ws pkg`, and `ws update` manage installs, upgrades, and cleanup from `pkg/`,
+  `presets.toml`, and `tools.toml`.
+- **Go CLI & TUI (`ws/`)** — single binary built by `mise run ws:install`
+  (using the Go version pinned in `.mise/config.toml`) into `~/.local/bin/ws`;
+  owns machine setup (`ws bootstrap`), daily operations, and unified state
+  (`ws.db`, `config.toml`, `theme`, `ledger.json`) under `~/.ws/` (`WS_HOME`
+  to override).
 - **Identity zones** — `~/work` and `~/personal` carry a `mise.toml` whose
-  `[env]` applies below it. `mise run identity` seeds it from
-  `config/identity/` once as a real file, then never overwrites.
-- **Secrets** — 1Password via `lib/op.sh`. `mise.local.toml` and
-  `.mise/tasks/local/` are the gitignored private layer.
+  `[env]` applies below it. `ws zone apply` (or `mise run identity`) seeds it
+  from `config/identity/` once as a real file, then never overwrites.
+- **Secrets** — 1Password via `ws vault` (`mise run secrets:*` / `op:*` shim
+  to it). `mise.local.toml` and `.mise/tasks/local/` are the gitignored
+  private layer.
 
 ## Layout
 
 ```
-bootstrap.sh   curl-able entry      links/     symlink manifests
-.mise/tasks/   all entry points     pkg/       package lists
-lib/           shared bash          os/        OS-specific setup
-config/<app>/  dotfiles             themes/    palettes
-.claude/agents/  audit agents       .local/    machine-local (gitignored)
+bootstrap.sh     curl-able entry -> ws  links/         symlink manifests
+.mise/tasks/     ws:install, check, shims  pkg/        package lists
+ws/              Go CLI & TUI module    presets.toml   composable OS presets
+tools.toml       exception tool catalog os/            OS-specific hooks
+lib/             hook bash helpers      themes/        palettes
+config/<app>/    dotfiles               config/identity/  per-zone mise seeds
+.claude/agents/  audit agents           .local/        machine-local (gitignored)
 ```
 
 ## Standards
@@ -49,21 +64,22 @@ config/<app>/  dotfiles             themes/    palettes
 - `#!/usr/bin/env bash` + `set -euo pipefail`; shellcheck + shfmt clean.
 - Runs on macOS and Linux — no GNU-only flags on mac's BSD tools.
 - Idempotent: `mkdir -p`, `ln -sfn`, `--needed`; `|| true` only with a reason.
-- Machine-mutating code lives in `os/` and the tasks calling it, never `lib/`.
+- Machine-mutating shell lives in `os/` hooks and `bootstrap.sh`, never `lib/`.
 - gum for prompts, fzf for pickers, and a non-interactive escape for each.
-- Tasks are thin; first lines are shebang + `#MISE description=`.
+- Tasks are thin shims that exec `ws` (except `check` and `ws:install`); first
+  lines are shebang + `#MISE description=`.
 - Package lists: one per line, `#` section headers, alphabetical.
 - Conventional commits, one concern each.
-- Comments: almost never. One short line, only for what the code cannot
-  say — a trap, a why. No narration, no restating the obvious, no headers
-  explaining a file's history or reasoning.
+- Comments: none in Go or shell — only directives (`//go:`/`//nolint` in Go;
+  shebang, `#MISE`/`#USAGE`, `# shellcheck` in shell), enforced by
+  `mise run check` and `ws/internal/lint`.
 
 ## Adding a tool
 
 Verify its current config path → `config/<tool>/` → `links/` entry → if
 themeable, `colors-template.*` + registry entry + all palettes + gitignore
 the output → `pkg/` entry per profile → sync hook if needed → verify with
-`mise run check` and `sync --dry-run`.
+`mise run check`, `go test -race ./...`, and `ws apply --dry-run`.
 
 ## Traps
 
@@ -71,13 +87,16 @@ the output → `pkg/` entry per profile → sync hook if needed → verify with
   template.
 - Templates do plain `{{token}}` substitution and die on any unknown token,
   including in comments and in configs whose own syntax uses `{{ }}`.
-- macOS ships bash 3.2 and brew's bash is installed *by* the mac bootstrap —
-  no `mapfile` in `os/mac/bootstrap.sh` or `.mise/tasks/sync`.
+- macOS ships bash 3.2 and brew's bash is installed *by* `ws bootstrap` —
+  keep `bootstrap.sh` (and anything it runs before brew's bash exists:
+  `.mise/tasks/ws/install`, `lib/common.sh`) bash 3.2 compatible (no `mapfile`
+  or associative arrays).
 - Homebrew 6: `HOMEBREW_NO_ASK=1` for unattended installs; third-party taps
   need `brew tap` + `brew trust --formula`; `--eval-all` is deprecated.
-- Arch: `--noconfirm` cannot resolve conflicts, so `os/arch/conflicts.sh`
-  (run by bootstrap and `pkg`) removes what `pkg/arch.txt` replaces — `jack`,
-  `yq`, the v4 noctalia and old DMS packages. Add new renames there.
+- Arch: `--noconfirm` cannot resolve conflicts, so `pkg/arch-conflicts.txt`
+  lists packages replaced by `pkg/arch.txt` (`jack`, `yq`, the v4 noctalia and
+  old DMS packages). `ws` reads it for confirmed pre-upgrade removals — add
+  new renames there.
 - noctalia v5 is the native `noctalia` package (`noctalia msg …` IPC,
   `config.toml`); `noctalia-shell` is the dead v4 name. DMS is now
   `dux-shell`/`dux-greeter-bin`, still `dms`/`dms-greeter` binaries.

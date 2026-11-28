@@ -1,0 +1,14 @@
+# Installed packages replaced by pkg/arch.txt entries.
+# Removed before upgrades/installs because --noconfirm cannot resolve conflicts.
+
+# audio (replaced by pipewire-jack)
+jack
+
+# cli (replaced by go-yq)
+yq
+
+# wayland desktop (replaced by dux-shell, dux-greeter-bin, noctalia)
+dms-shell
+greetd-dms-greeter-bin
+noctalia-qs
+noctalia-shell

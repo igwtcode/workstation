@@ -1,8 +1,4 @@
 #!/usr/bin/env zsh
-# Mac layer — sourced by zshrc before core.zsh. Brew env and GNU tool
-# parity: linux-authored scripts expect GNU coreutils/sed/grep/make, so the
-# brew gnubin dirs go in front of PATH (CLAUDE.md § Traps). gawk needs no
-# gnubin — its formula ships an unprefixed awk.
 
 _ws_cached /opt/homebrew/bin/brew shellenv zsh
 
@@ -10,21 +6,15 @@ export PATH=$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$HOMEBREW_PREFIX/opt/g
 
 export HOMEBREW_NO_AUTO_UPDATE=1
 
-# brew's rustup is keg-only — the rustup command itself isn't linked into
-# brew's bin ($HOME/.cargo/bin proxies come from core.zsh)
 export PATH=$PATH:$HOMEBREW_PREFIX/opt/rustup/bin
 
-# util-linux is keg-only; appended so it can't shadow mac's cal/column/getopt
 export PATH=$PATH:$HOMEBREW_PREFIX/opt/util-linux/bin:$HOMEBREW_PREFIX/opt/util-linux/sbin
 
-# Android SDK (Expo/React Native), installed by `mise run android` or Studio
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
 
-# clipboard helper used by core aliases
 clipcopy() { pbcopy "$@" }
 
-# keep the machine awake while agents run (display still sleeps)
 claude() { caffeinate -i command claude "$@" }
 codex() { caffeinate -i command codex "$@" }
 opencode() { caffeinate -i command opencode "$@" }

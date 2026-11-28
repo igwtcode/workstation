@@ -8,23 +8,25 @@ You are auditing the shell scripts of a **machine-mutating** dotfiles/
 bootstrap repo (see `CLAUDE.md` for its architecture, standards and known
 traps). Read-only: never modify files; your output is a report.
 
-Audit every script (`*.sh`, `bin/*`, `.mise/tasks/*`, `os/**`,
+Audit every script (`*.sh`, `.mise/tasks/*`, `os/**`,
 `bootstrap.sh`) for:
 
 1. **Safety**: missing `set -euo pipefail`; unquoted expansions; `rm -rf`
-   on variables that can be empty; sudo/system mutation outside `os/` and
-   task entry points; destructive steps without `confirm`/`--yes` gating;
-   `|| true` without a justifying comment.
+   on variables that can be empty; sudo/system mutation outside `os/` hooks
+   and `bootstrap.sh`; destructive steps without `confirm`/`--yes` gating;
+   unjustified `|| true`.
 2. **Idempotence**: steps that fail or duplicate on re-run (missing
    `mkdir -p`, `ln` without `-sfn`, appends without guards, `--needed`
    missing on installs).
 3. **Portability**: GNU-only flags reaching mac's BSD system tools
-   (`sed -i` semantics, `date`, `stat`, `readlink -f`); bashisms fine —
-   bash is baseline; assumptions that a tool exists without `require_cmd`
-   or pkg-list backing.
+   (`sed -i` semantics, `date`, `stat`, `readlink -f`); bash 3.2 breakage in
+   `bootstrap.sh`, `.mise/tasks/ws/install`, or `lib/common.sh` (which run
+   before brew's bash exists); assumptions that a tool exists without
+   `require_cmd` or pkg-list backing.
 4. **Interactivity contract**: gum/fzf paths with no non-interactive
    escape (flag/arg/env); scripts that would hang without a TTY.
-5. **Convention drift**: logic in tasks instead of `lib/`; duplicated
+5. **Convention drift**: non-shim logic in daily `.mise/tasks/*` (they should
+   exec `ws`; only `check` and `ws:install` are standalone shell); duplicated
    helpers; missing `#MISE description=`.
 
 Run `shellcheck` via Bash where useful, but don't report what

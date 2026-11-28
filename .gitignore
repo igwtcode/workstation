@@ -21,7 +21,6 @@ config/hypr/local.lua
 # Runtime droppings that apps write into linked dirs
 config/niri/noctalia.kdl
 config/noctalia/*
-!config/noctalia/settings.json
 !config/noctalia/config.toml
 config/nvim/lazy-lock.json.bak
 config/tmux/plugins/
@@ -53,3 +52,11 @@ mise.local.lock
 .claude/settings.local.json
 *.local
 .env
+
+# ws build output and state, should a build or WS_HOME ever land in the repo
+/dist/
+ws.db
+ws.db-*
+ws.db.enc
+ledger.json
+ledger.lock

@@ -1,155 +1,52 @@
 #!/usr/bin/env bash
-#MISE description="Apply the symlink manifest (repo -> HOME) for this machine's profile"
-#USAGE flag "-p --profile <profile>" help="Profile override (default: detected)" {
-#USAGE   choices "mac" "arch" "server"
-#USAGE }
-#USAGE flag "-n --dry-run" help="Report what would change without touching anything"
-#USAGE flag "-y --yes" help="Replace existing files without prompting (still backs up to *.pre-ws)"
+#MISE description="Apply the symlink manifest and theme templates (repo -> HOME) for this machine's profile"
 set -euo pipefail
 
-root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
-# shellcheck source=lib/common.sh
-source "$root/lib/common.sh"
-# shellcheck source=lib/manifest.sh
-source "$root/lib/manifest.sh"
-
-if [[ ${usage_yes:-false} == true ]]; then
-  export WS_YES=1
-fi
-if [[ ${usage_dry_run:-false} == true ]]; then
-  export WS_DRY_RUN=1
-fi
-
-# --- post-sync hooks: the few non-link steps sync owns ----------------------
-
-# hook <description> <cmd>... — announce and run (announce only in dry-run)
-hook() {
-  local desc=$1
-  shift
-  if [[ ${WS_DRY_RUN:-0} == 1 ]]; then
-    log "[dry-run] hook: $desc"
-    return 0
-  fi
-  log "hook: $desc"
-  "$@"
+ws=$(command -v ws || true)
+[[ -n $ws || ! -x $HOME/.local/bin/ws ]] || ws=$HOME/.local/bin/ws
+[[ -n $ws ]] || {
+  printf 'error: ws not installed — run: mise run ws:install\n' >&2
+  exit 1
 }
 
-_bat_cache() { bat cache --build >/dev/null; }
-
-_install_tpm() {
-  local dir=$HOME/.config/tmux/plugins/tpm
-  git clone --depth=1 https://github.com/tmux-plugins/tpm "$dir"
-  "$dir/bin/install_plugins"
-}
-
-# extensions live in one shared dir, not per $GH_CONFIG_DIR
-_install_gh_dash() {
-  gh extension list 2>/dev/null | grep -q dlvhdr/gh-dash && return 0
-  gh extension install dlvhdr/gh-dash
-}
-
-_go_telemetry_off() { go telemetry off; }
-
-_codex_configs() {
-  local d
-  for d in "${CODEX_HOME:-}" "$HOME/.codex" "$HOME"/.codex-*; do
-    [[ -n $d && -f $d/config.toml ]] && printf '%s\n' "$d/config.toml"
-  done | sort -u
-}
-
-# rewrites only the [analytics] table, or appends it; a dotted or inline
-# `analytics` key is left for a human
-_codex_analytics_rewrite() {
-  awk '
-    /^[[:space:]]*\[/ {
-      in_a = ($0 ~ /^[[:space:]]*\[analytics\][[:space:]]*(#.*)?$/)
-      print
-      if (in_a) { print "enabled = false"; seen = 1 }
-      next
-    }
-    in_a && /^[[:space:]]*enabled[[:space:]]*=/ { next }
-    { print }
-    END { if (!seen) printf "%s[analytics]\nenabled = false\n", (NR ? "\n" : "") }
-  ' "$1"
-}
-
-_codex_analytics_pending() {
-  local f
-  while IFS= read -r f; do
-    grep -Eq '^[[:space:]]*analytics[[:space:]]*[.=]' "$f" && continue
-    cmp -s "$f" <(_codex_analytics_rewrite "$f") || printf '%s\n' "$f"
-  done < <(_codex_configs)
-}
-
-_codex_analytics_off() {
-  local f tmp yq
-  yq=$(command -v go-yq || command -v yq) || {
-    warn "codex: no yq to validate config.toml, skipped"
-    return 0
-  }
-  while IFS= read -r f; do
-    tmp=$(mktemp "$f.XXXXXX")
-    _codex_analytics_rewrite "$f" >"$tmp"
-    if [[ $("$yq" -p toml -o json '.analytics.enabled' "$tmp" 2>/dev/null) != false ]]; then
-      rm -f "$tmp"
-      warn "codex: $f did not validate, left unchanged"
-      continue
-    fi
-    cp -p "$f" "$f.pre-ws"
-    cat "$tmp" >"$f"
-    rm -f "$tmp"
-  done < <(_codex_analytics_pending)
-}
-
-# Some tools hardcode ~/.aws/credentials and ignore the per-zone
-# AWS_SHARED_CREDENTIALS_FILE. Point the default at one zone's file so they
-# resolve; relative target so it survives the tree moving. Only ever created
-# when nothing is there — an existing file or link is left alone.
-_link_default_aws_credentials() {
-  ln -sfn "${WS_AWS_DEFAULT_ZONE}-credentials" "$HOME/.aws/credentials"
-}
-
-post_sync_hooks() {
-  if ws_has bat; then
-    hook "rebuild bat cache" _bat_cache
-  fi
-
-  if ws_has git && [[ -d $HOME/.config/tmux && ! -d $HOME/.config/tmux/plugins/tpm ]]; then
-    hook "install tmux plugin manager (tpm)" _install_tpm
-  fi
-
-  if ws_has gh; then
-    hook "install the gh-dash extension" _install_gh_dash
-  fi
-
-  if ws_has go && [[ $(go telemetry) != off ]]; then
-    hook "turn go telemetry off" _go_telemetry_off
-  fi
-
-  if [[ -n $(_codex_analytics_pending) ]]; then
-    hook "turn codex analytics off" _codex_analytics_off
-  fi
-
-  # the zone name lands in a path, so hold it to the same shape zone.sh does
-  local aws_default=$HOME/.aws/credentials aws_zone=${WS_AWS_DEFAULT_ZONE:-}
-  if [[ -n $aws_zone && $aws_zone != */* && $aws_zone != .* &&
-    ! -e $aws_default && ! -L $aws_default &&
-    -f $HOME/.aws/$aws_zone-credentials ]]; then
-    hook "link ~/.aws/credentials -> ${WS_AWS_DEFAULT_ZONE}-credentials" _link_default_aws_credentials
-  fi
-}
-
-# --- main --------------------------------------------------------------------
-
-profile=$(resolve_profile "${usage_profile:-}")
-log "sync: profile $profile${WS_DRY_RUN:+ (dry-run)}"
-
-# `while read`, not `mapfile`: sync must also work under Apple's /bin/bash
-# 3.2, which is what a mac has until brew installs bash from pkg/mac-brew.txt
-manifests=()
-while IFS= read -r manifest; do
-  manifests+=("$manifest")
-done < <(manifest_files "$root" "$profile")
-manifest_apply "$root" "${manifests[@]}"
-
-post_sync_hooks
+args=()
+while (($#)); do
+  case $1 in
+    -p | --profile)
+      [[ $# -ge 2 ]] || {
+        printf 'error: %s needs a value\n' "$1" >&2
+        exit 2
+      }
+      case $2 in
+        mac) args+=(--preset mac-workstation) ;;
+        arch) args+=(--preset arch-desktop) ;;
+        server) args+=(--preset server) ;;
+        *) args+=(--preset "$2") ;;
+      esac
+      shift 2
+      ;;
+    -p=* | --profile=*)
+      val=${1#*=}
+      case $val in
+        mac) args+=(--preset mac-workstation) ;;
+        arch) args+=(--preset arch-desktop) ;;
+        server) args+=(--preset server) ;;
+        *) args+=(--preset "$val") ;;
+      esac
+      shift
+      ;;
+    -y | --yes)
+      args+=(--allow all --non-interactive)
+      shift
+      ;;
+    --)
+      args+=("$@")
+      break
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+exec "$ws" apply ${args[@]+"${args[@]}"}

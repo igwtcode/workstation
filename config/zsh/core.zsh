@@ -1,9 +1,4 @@
 #!/usr/bin/env zsh
-# Shared zsh core for every profile. Sourced by zshrc after the OS layer
-# (mac.zsh/linux.zsh), which provides PATH/env groundwork and clipcopy().
-# Everything tool-specific is guarded so a machine without the tool works.
-
-# --- options ------------------------------------------------------------
 
 setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_IGNORE_DUPS
@@ -11,7 +6,7 @@ setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_IGNORE_SPACE
 setopt HIST_FIND_NO_DUPS
 setopt HIST_SAVE_NO_DUPS
-setopt HIST_NO_FUNCTIONS # do not save function definitions
+setopt HIST_NO_FUNCTIONS
 setopt APPEND_HISTORY
 setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
@@ -19,25 +14,20 @@ setopt prompt_subst
 setopt AUTO_CD
 
 bindkey -v
-export KEYTIMEOUT=1 # hundredths of a second; zsh's 400ms default makes vi mode switches feel laggy
-
-# --- completion ---------------------------------------------------------
+export KEYTIMEOUT=1
 
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
 zstyle ':completion:*' matcher-list 'r:|=*' 'l:|=*' 'r:|=* m:{a-z\-}={A-Z\_}'
 zstyle ':completion:*' list-dirs-first true
-# group headers + hand the menu to fzf-tab
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' menu no
-# fzf-tab for flags and options only; file/dir completion stays native zsh
 zstyle ':fzf-tab:*' disabled-on files
 
 fpath=(~/.local/share/zsh/site-functions $fpath)
 
 autoload -U +X bashcompinit && bashcompinit
 autoload -Uz compinit
-# full check (and dump rebuild) every 3h, cached dump otherwise
 _ws_dump=(${ZDOTDIR:-$HOME}/.zcompdump(N.mh+2))
 if (( $#_ws_dump )); then
   compinit -u && touch $_ws_dump
@@ -46,11 +36,6 @@ else
 fi
 unset _ws_dump
 
-# --- environment ----------------------------------------------------------
-
-# XDG base dirs come from ~/.zshenv (config/shell/xdg.sh) — set there, not
-# here, so scripts and remote commands get them too. Guarded anyway: this
-# file must not break if sourced without that layer.
 : "${XDG_CONFIG_HOME:=$HOME/.config}" "${XDG_CACHE_HOME:=$HOME/.cache}"
 
 export HISTORY_TIME_FORMAT="%Y-%m-%d %T "
@@ -59,30 +44,21 @@ export HISTSIZE=9999
 export SAVEHIST=9999
 export EDITOR=nvim
 export VISUAL=nvim
-# WS_CODE_ROOT is set per identity zone (~/work, ~/personal) by mise; this
-# is only the fallback for shells sitting outside every zone.
 export WS_CODE_ROOT=${WS_CODE_ROOT:-$HOME}
-# starship's own default is ~/.config/starship.toml, not a starship/ dir
 export STARSHIP_CONFIG=$XDG_CONFIG_HOME/starship/config.toml
 export TF_PLUGIN_CACHE_DIR=$XDG_CACHE_HOME/terraform-plugins
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin
 
-# Base fzf look; colors come from the theme system below.
 export FZF_DEFAULT_OPTS=" \
 --preview-window='border-rounded' --prompt='❯ ' \
 --marker='● ' --pointer='▶ ' --separator='─' --scrollbar='▌' --highlight-line \
 --multi --bind 'ctrl-a:select-all,ctrl-alt-a:deselect-all' \
 --layout=reverse"
 
-# Theme-rendered color snippets (`mise run theme` writes these; the config
-# dirs are symlinked, so they resolve on every machine once rendered).
 [[ -f $XDG_CONFIG_HOME/fzf/colors.sh ]] && source $XDG_CONFIG_HOME/fzf/colors.sh
 [[ -f $XDG_CONFIG_HOME/gum/colors.sh ]] && source $XDG_CONFIG_HOME/gum/colors.sh
-# zsh's own snippet sits next to this file: only zshenv/zshrc are symlinked.
 [[ -f $_ws_zdir/colors.sh ]] && source $_ws_zdir/colors.sh
-
-# --- aliases --------------------------------------------------------------
 
 alias .....='cd ../../../..'
 alias ....='cd ../../..'
@@ -90,11 +66,9 @@ alias ...='cd ../..'
 alias ..='cd ..'
 alias b=bat
 alias c=clear
-alias cp-awsprofile=' sel-awsprofile | tr -d "\n" | clipcopy'
 alias cr='cargo run -- '
 alias crq='cargo run -q -- '
 alias gd='git diff'
-# go-gh's keyring fallback ignores GH_CONFIG_DIR, so pass the zone's token
 alias ghd=' GH_TOKEN=$(gh auth token) gh dash'
 alias gl="git log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) %C(dim white)%<(16)%an%C(reset) %C(bold green)%<(14)%ar%C(reset) %C(white)%s%C(reset)%C(auto)%d%C(reset)' --all"
 alias gp='git pull --all --prune'
@@ -111,7 +85,6 @@ alias kgd='kubectl get deploy'
 alias kgp='kubectl get pods'
 alias kgs='kubectl get service'
 alias kl='kubectl logs'
-# lazydocker takes an explicit CONFIG_DIR rather than following XDG
 alias lazydocker=' CONFIG_DIR=$XDG_CONFIG_HOME/lazydocker lazydocker'
 alias lazygit=' lazygit'
 alias lg=lazygit
@@ -137,12 +110,9 @@ if command -v go-task &>/dev/null; then
   export TASK_EXE='go-task'
 fi
 
-# --- functions ------------------------------------------------------------
-
 ytv() { yt-dlp --cookies-from-browser firefox --no-playlist --progress -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" --merge-output-format mp4 -o "$HOME/Downloads/%(title)s.%(ext)s" "$1"; }
 yta() { yt-dlp --cookies-from-browser firefox --no-playlist --progress -x --audio-format mp3 --audio-quality 0 -o "$HOME/Downloads/%(title)s.%(ext)s" "$1"; }
 
-# switch git branch via fzf, then pull
 gb() {
   local branch
   branch=$(git branch -a | grep -v 'HEAD ->' | sed 's/^[* ]*//' | sed 's|remotes/||' | sort -u |
@@ -150,7 +120,6 @@ gb() {
   [[ -n "$branch" ]] && { git switch "${branch#origin/}"; gp || true }
 }
 
-# cd to the repo/worktree lazygit was in on exit (shift+Q skips)
 function lazygit {
   local f
   f=$(mktemp) || return
@@ -159,7 +128,6 @@ function lazygit {
   rm -f "$f"
 }
 
-# stage picked files and commit with a gum-prompted message
 gc() {
   local files msg
   files=$(git -c color.status=always status --short |
@@ -172,18 +140,13 @@ gc() {
   echo "$files" | xargs git add && git commit -m "$msg"
 }
 
-# --- identity zones -------------------------------------------------------
 #
-# Zones are read from the ~/<zone>/mise.toml files `mise run identity` seeds
-# rather than hardcoded, so adding a zone needs no change here. Those values
-# are mise templates, hence the {{env.HOME}} expansion.
 
 _ws_zone_get() {
   sed -n "s|^[[:space:]]*$2[[:space:]]*=[[:space:]]*\"\(.*\)\"[[:space:]]*\$|\1|p" "$1" 2>/dev/null |
     head -1 | sed "s|{{env.HOME}}|$HOME|g"
 }
 
-# "<zone>\t<zone mise.toml>" per zone, the active zone first
 ws_zones() {
   local f zone
   local -a first=() rest=()
@@ -200,9 +163,6 @@ _ws_repos_in() {
     sed 's:/\.git/*$::'
 }
 
-# goto_repodir [base_dir] [query] — fzf over git repos, cd into the pick.
-# An empty base_dir spans every zone's code root, so repos stay reachable
-# from outside a zone and from the other one.
 goto_repodir() {
   local base="$1" query="$2" zone f root rel choice
   local -a repos=()
@@ -221,21 +181,51 @@ goto_repodir() {
   [[ -n $choice ]] && cd "${choice/#\~/$HOME}"
 }
 
-# repo picker across every zone; cd'ing in switches identity via mise
-gg() { goto_repodir "" "$1" }
+gg() {
+  if (( $+commands[ws] )); then
+    local target
+    if (( $# )); then
+      target=$(command ws repo pick "$1") || return
+    else
+      target=$(command ws repo pick) || return
+    fi
+    [[ -n $target && -d $target ]] && cd "$target"
+    return
+  fi
+  goto_repodir "" "$1"
+}
 
-# jump into a zone; identity (git/gh/aws/claude) follows via mise
 zw() { cd ${1:+$HOME/work/code/}${1:-$HOME/work} }
 zp() { cd ${1:+$HOME/personal/code/}${1:-$HOME/personal} }
 
-# workstation tasks from any directory: `ws` lists them, `ws update` runs one
-_ws_repo=${${:-$HOME/.zshrc}:A:h:h:h}
-ws() { if (( $# )); then mise -C $_ws_repo run "$@"; else mise -C $_ws_repo tasks; fi }
+ws() {
+  (( $+commands[ws] )) || { print -ru2 "ws: ws binary not found in PATH"; return 127 }
+  if (( $# == 0 )) || [[ $1 == tui ]]; then
+    local f dir rc
+    f=$(mktemp) || return
+    WS_TUI_CD_FILE=$f command ws "$@"
+    rc=$?
+    if [[ -s $f ]]; then
+      dir=$(<"$f")
+      dir=${dir%$'\n'}
+      [[ -n $dir && -d $dir ]] && cd "$dir"
+    fi
+    rm -f "$f"
+    return $rc
+  fi
+  command ws "$@"
+}
+alias wst='ws tui'
 
-# Pick an AWS profile from *every* zone's files, active zone first, so a
-# work profile is reachable from the personal zone. The zone column is only
-# there to pick and filter by; the bare profile name is what gets printed.
 sel-awsprofile() {
+  if (( $+commands[ws] )); then
+    if (( $# )); then
+      command ws aws pick "$1"
+    else
+      command ws aws pick
+    fi
+    return
+  fi
   local zone f cfg cred
   {
     while IFS=$'\t' read -r zone f; do
@@ -252,7 +242,12 @@ sel-awsprofile() {
   } | fzf --no-multi --height=40% --query "$1" --prompt="AWS profile: " | cut -f2
 }
 
-# switch the active gh account
+cp-awsprofile() {
+  local prof
+  prof=$(sel-awsprofile "$@") || return
+  [[ -n $prof ]] && print -rn -- "$prof" | clipcopy
+}
+
 ghs() {
   gh auth status --json 'hosts' --jq '.hosts."github.com".[].login' |
     fzf --no-multi --height=4 --query "$1" --prompt "Github user: " |
@@ -283,20 +278,15 @@ kc() {
   [[ -n "$ctx" ]] && kubectl config use-context $ctx
 }
 
-# --- tool inits & completions ----------------------------------------------
-
-# not cached: the output bakes in the current PATH
 command -v mise &>/dev/null && eval "$(mise activate zsh)"
 _ws_cached starship init zsh --print-full-init
 _ws_cached zoxide init zsh
 _ws_cached fzf --zsh
 _ws_cached gh completion -s zsh
 _ws_cached go-task --completion zsh
+(( $+commands[ws] )) && _ws_cached ws completion zsh
 (( $+commands[aws_completer] )) && complete -C $commands[aws_completer] aws
 
-# Plugins: first readable candidate wins (pacman path on arch, brew on mac).
-# fzf-tab must load after compinit (above) but before autosuggestions/
-# syntax-highlighting below, which wrap the completion widget too.
 for _p in \
   /usr/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh \
   ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/fzf-tab/fzf-tab.zsh}; do
@@ -307,7 +297,6 @@ for _p in \
   ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh}; do
   [[ -r $_p ]] && source $_p && break
 done
-# syntax highlighting wants to be sourced last
 for _p in \
   /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
   ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh}; do

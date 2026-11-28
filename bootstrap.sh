@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
-# Fresh-machine entry point. Installs git + mise (mac: also Xcode CLT and
-# Homebrew), clones or pulls the repo, then hands off to `mise run
-# bootstrap`. Plain bash + curl only — no repo tooling exists yet. Re-runnable.
 set -euo pipefail
 
 WS_REPO=${WS_REPO:-https://github.com/igwtcode/workstation.git}
 WS_DIR=${WS_DIR:-$HOME/personal/code/igwtcode/workstation}
-
-# --- plain-bash output helpers (gum arrives later, via the pkg lists) ----
 
 if [[ -t 2 ]]; then
   _c_info=$'\033[1;34m' _c_err=$'\033[1;31m' _c_off=$'\033[0m'
@@ -22,14 +17,15 @@ die() {
 }
 has() { command -v "$1" >/dev/null 2>&1; }
 
-# --- args -----------------------------------------------------------------
-
 usage() {
   cat <<EOF
 usage: bootstrap.sh [--profile mac|arch|server] [--yes]
 
+Install git + mise (plus Xcode CLT and Homebrew on macOS), clone or pull
+the repo, install the pinned Go toolchain, build ws, and exec ws bootstrap.
+
   -p, --profile   profile override (default: detected from the OS)
-  -y, --yes       skip confirmations (here and in the handed-off tasks)
+  -y, --yes       skip confirmations (here and in ws bootstrap)
   -h, --help      this text
 
 env: WS_REPO  clone URL   (default: https://github.com/igwtcode/workstation.git)
@@ -56,8 +52,6 @@ while [[ $# -gt 0 ]]; do
     *) die "unknown argument: $1 (see --help)" ;;
   esac
 done
-
-# --- OS + profile (minimal mirror of lib/common.sh, which isn't here yet) -
 
 os_detect() {
   if [[ $(uname -s) == Darwin ]]; then
@@ -91,8 +85,6 @@ case $profile in
   *) die "unknown profile '$profile' (expected mac|arch|server)" ;;
 esac
 
-# --- confirm before touching the machine ----------------------------------
-
 log "profile: $profile"
 log "repo:    $WS_REPO -> $WS_DIR"
 if [[ $yes != 1 ]]; then
@@ -103,16 +95,12 @@ if [[ $yes != 1 ]]; then
   [[ $reply == [yY]* ]] || die "aborted"
 fi
 
-# --- sudo: the brew installer and system settings need it; fail here rather
-# --- than halfway through an install --------------------------------------
-
 if [[ $os == mac ]] && ! sudo -n true 2>/dev/null; then
   { [[ -t 0 && -t 2 ]] && sudo -v; } || die "need sudo access on macos"
 fi
 
-# --- prerequisites: git + mise only; everything else is os/<profile>/ ------
-
 prereqs_mac() {
+  export HOMEBREW_NO_ASK=1
   if xcode-select -p >/dev/null 2>&1; then
     log "xcode clt: present"
   else
@@ -157,7 +145,6 @@ prereqs_arch() {
   sudo pacman -S --needed --noconfirm git mise
 }
 
-# unknown distros: best-effort git, mise via the standalone installer
 prereqs_linux() {
   if ! has git; then
     if has apt-get; then
@@ -180,8 +167,6 @@ case $os in
   *) prereqs_linux ;;
 esac
 
-# --- clone or update --------------------------------------------------------
-
 if [[ -e $WS_DIR/.git ]]; then
   log "repo: existing clone — pulling (ff-only)"
   git -C "$WS_DIR" pull --ff-only
@@ -193,20 +178,32 @@ else
   git clone "$WS_REPO" "$WS_DIR"
 fi
 
-# --- hand off to mise -------------------------------------------------------
-
 mise_bin=$(command -v mise || true)
 if [[ -z $mise_bin && -x $HOME/.local/bin/mise ]]; then
   mise_bin=$HOME/.local/bin/mise
 fi
 [[ -n $mise_bin ]] || die "mise not found after prerequisite install"
 
-cd "$WS_DIR"
-"$mise_bin" trust # config in a fresh clone is untrusted; needed pre-run
+mise_dir=$(dirname "$mise_bin")
+case :$PATH: in
+  *":$mise_dir:"*) ;;
+  *) export PATH="$mise_dir:$PATH" ;;
+esac
 
-args=(run bootstrap --profile "$profile")
+cd "$WS_DIR"
+repo=$(pwd)
+"$mise_bin" trust
+log "toolchain: installing repo tools (go)"
+"$mise_bin" install
+log "ws: building binary"
+"$mise_bin" run ws:install
+
+ws_bin=$HOME/.local/bin/ws
+[[ -x $ws_bin ]] || die "ws not found at $ws_bin after build"
+
+args=(bootstrap --repo "$repo" --profile "$profile")
 if [[ $yes == 1 ]]; then
   args+=(--yes)
 fi
-log "handing off: mise ${args[*]}"
-exec "$mise_bin" "${args[@]}"
+log "handing off: $ws_bin ${args[*]}"
+exec "$ws_bin" "${args[@]}"

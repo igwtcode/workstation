@@ -1,7 +1,6 @@
-# Template registry — the single source of what `mise run theme` renders.
-# The /audit consistency check mirrors this against .gitignore: every
-# output path here must be gitignored (outputs are generated, never
-# committed).
+# Template registry — the single source of what `ws theme` / `ws apply` and `mise run theme` render.
+# Consistency checks mirror this against .gitignore: every output path here
+# must be gitignored (outputs are generated, never committed).
 #
 # Format (one entry per line, paths relative to the repo root, no spaces):
 #   <template> <output> <post-hook>

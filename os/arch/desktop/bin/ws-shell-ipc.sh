@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-# Installed to /usr/local/bin/ws-shell-ipc by os/arch/desktop/setup.sh.
-# Maps neutral shell-IPC verbs to the running desktop shell's own IPC
-# (noctalia or DMS), so the compositor keybindings stay identical across
-# shells. The shell comes from WS_SHELL (set by the login session entry);
-# fallback is a process probe, default noctalia.
 set -euo pipefail
 
 verb=${1:-}

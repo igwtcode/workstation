@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-# Arch post-install: system tweaks after packages land. Every step
-# is idempotent and individually runnable — no args runs them all, naming
-# steps runs a subset (`postinstall.sh docker libvirt`), --list prints the
-# step names. Machine-mutating (sudo, systemd, /etc) — run via
-# os/arch/bootstrap.sh or explicitly; never as part of the dev loop.
 set -euo pipefail
 
 root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
@@ -43,7 +38,6 @@ step_docker() {
 }
 
 step_libvirt() {
-  # the default NAT network needs the iptables firewall backend
   if ! sudo grep -qs '^firewall_backend = "iptables"' /etc/libvirt/network.conf; then
     echo 'firewall_backend = "iptables"' | sudo tee -a /etc/libvirt/network.conf >/dev/null
   fi
@@ -52,14 +46,13 @@ step_libvirt() {
     sudo usermod -aG libvirt "$USER"
     log "libvirt: added $USER to libvirt group (takes effect on re-login)"
   fi
-  sudo virsh net-autostart default >/dev/null 2>&1 || true # network may not exist yet
-  sudo virsh net-start default >/dev/null 2>&1 || true     # already-active is fine
+  sudo virsh net-autostart default >/dev/null 2>&1 || true
+  sudo virsh net-start default >/dev/null 2>&1 || true
   if ws_has ufw; then
     sudo ufw route allow from 192.168.122.0/24
   fi
 }
 
-# the android emulator needs /dev/kvm
 step_kvm() {
   if id -nG "$USER" | tr ' ' '\n' | grep -qx kvm; then
     log "kvm: $USER already in kvm group"
@@ -70,8 +63,6 @@ step_kvm() {
 }
 
 step_dns() {
-  # NetworkManager + tailscale want systemd-resolved with the stub
-  # resolver on /etc/resolv.conf (tailscale.com/kb: linux dns)
   sudo systemctl enable --now systemd-resolved.service
   if [[ $(readlink -f /etc/resolv.conf) != /run/systemd/resolve/stub-resolv.conf ]]; then
     sudo ln -sfn /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
@@ -86,8 +77,8 @@ step_tailscale() {
     log "tailscale: already up"
     return 0
   fi
-  # `tailscale up` blocks on browser auth — only offer it interactively
-  if [[ -t 0 && -t 2 ]] && confirm "tailscale: run 'tailscale up' now (opens a login URL)?"; then
+  if [[ -t 0 && -t 2 && ${WS_NON_INTERACTIVE:-0} != 1 && ${WS_YES:-0} != 1 && ${WS_YES:-} != true ]] &&
+    confirm "tailscale: run 'tailscale up' now (opens a login URL)?"; then
     sudo tailscale up
     sudo tailscale set --operator="$USER"
   else

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+#MISE description="Build and install the ws CLI/TUI binary to ~/.local/bin/ws"
+#USAGE flag "-n --dry-run" help="Report what would be built without executing"
+#USAGE flag "-o --dest <dir>" help="Install directory (default: ~/.local/bin)"
+#USAGE flag "--optional" help="Warn and exit 0 instead of failing if go is not installed"
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+# shellcheck source=lib/common.sh
+source "$root/lib/common.sh"
+
+find_go() {
+  local p
+  if ws_has mise; then
+    p=$(cd "$root" && mise which go 2>/dev/null || true)
+    if [[ -n $p && -x $p ]]; then
+      printf '%s\n' "$p"
+      return 0
+    fi
+  fi
+  if ws_has go; then
+    command -v go
+    return 0
+  fi
+  for p in /opt/homebrew/bin/go /usr/local/bin/go; do
+    if [[ -x $p ]]; then
+      printf '%s\n' "$p"
+      return 0
+    fi
+  done
+  return 1
+}
+
+dest=${usage_dest:-$HOME/.local/bin}
+target=$dest/ws
+ver=$(git -C "$root" describe --tags --always --dirty 2>/dev/null || echo dev)
+
+if [[ ${usage_dry_run:-false} == true || ${WS_DRY_RUN:-0} == 1 ]]; then
+  log "[dry-run] build $root/ws/cmd/ws ($ver) -> $target"
+  exit 0
+fi
+
+go_bin=$(find_go || true)
+if [[ -z $go_bin ]]; then
+  if [[ ${usage_optional:-false} == true ]]; then
+    warn "go not found — skipping ws binary build"
+    exit 0
+  fi
+  die "go is required to build ws (install go, then re-run 'mise run ws:install')"
+fi
+
+tmp='' prev_tmp=''
+cleanup_tmp() {
+  if [[ -n $tmp ]]; then
+    rm -f "$tmp"
+  fi
+  if [[ -n $prev_tmp ]]; then
+    rm -f "$prev_tmp"
+  fi
+}
+trap cleanup_tmp EXIT
+
+mkdir -p "$dest"
+tmp=$(mktemp "$dest/.ws.XXXXXX")
+(cd "$root/ws" && "$go_bin" build -ldflags "-s -w -X main.Version=$ver -X github.com/igwtcode/workstation/ws/internal/config.BinaryVersion=$ver" -o "$tmp" ./cmd/ws)
+chmod 755 "$tmp"
+if [[ -f $target ]]; then
+  prev_tmp=$(mktemp "$dest/.ws.prev.XXXXXX")
+  cp -p "$target" "$prev_tmp"
+  mv -f "$prev_tmp" "$target.prev"
+  prev_tmp=''
+fi
+mv -f "$tmp" "$target"
+tmp=''
+
+log "ws: installed $target ($ver)"

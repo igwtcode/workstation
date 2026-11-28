@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# usage: scratch.sh <dir> <owner-session>
-# hidden session per owner: M-t detaches it, the shell keeps running
 set -euo pipefail
 
 dir=$1 owner=$2

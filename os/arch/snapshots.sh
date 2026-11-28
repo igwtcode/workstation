@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-# Btrfs snapshot stack: snapper root config + snap-pac for pre/post pacman
-# snapshots, made boot-selectable via grub-btrfs or limine-snapper-sync
-# depending on the detected bootloader. Packages: pkg/arch-snapshots.txt
-# (common + matching bootloader section). Self-skips when / is not btrfs or
-# when snapper is already configured, so an arch derivative that ships its
-# own snapshot stack is a no-op rather than a conflict. Machine-mutating —
-# run via os/arch/bootstrap.sh or explicitly; never as part of the dev loop.
 set -euo pipefail
 
 root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
@@ -37,7 +30,9 @@ detect_bootloader() {
 bootloader=$(detect_bootloader)
 log "snapshots: bootloader detected: $bootloader"
 
-confirm "snapshots: set up snapper + snap-pac ($bootloader boot entries)?"
+if ! confirm "snapshots: set up snapper + snap-pac ($bootloader boot entries)?"; then
+  declined_exit snapshots
+fi
 
 pkgs=(snapper snap-pac)
 case $bootloader in
@@ -47,10 +42,6 @@ case $bootloader in
 esac
 paru -S --needed --noconfirm "${pkgs[@]}"
 
-# snapper root config. When /.snapshots is already a mounted subvolume
-# (fstab-managed layout), create-config refuses — unmount it, let snapper
-# create its config, drop the subvolume snapper made, then remount the
-# original (the standard dance from the snapper docs).
 if sudo snapper -c root get-config >/dev/null 2>&1; then
   log "snapshots: snapper root config already exists"
 else
@@ -70,7 +61,6 @@ else
   log "snapshots: snapper root config created"
 fi
 
-# pre/post pacman snapshots (snap-pac) are the point here — no timeline
 sudo snapper -c root set-config 'TIMELINE_CREATE=no' 'ALLOW_GROUPS=wheel' 'SYNC_ACL=yes'
 sudo systemctl enable --now snapper-cleanup.timer
 

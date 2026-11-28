@@ -1,0 +1,115 @@
+# Exception catalog for non-default installers, distro package remaps,
+# self-updating binaries, and conflict prevention. Standard same-name packages
+# continue to live in pkg/*.txt.
+
+[tool.claude-code]
+bin = "claude"
+description = "Claude Code CLI"
+updates = "manager"
+install = [
+  { via = "cask", name = "claude-code@latest", os = "darwin" },
+  { via = "pacman", name = "claude-code" },
+  { via = "script", url = "https://claude.ai/install.sh", tofu = true },
+]
+
+[tool.codex]
+bin = "codex"
+description = "OpenAI Codex CLI"
+updates = "manager"
+install = [
+  { via = "cask", name = "codex", os = "darwin" },
+  { via = "pacman", name = "openai-codex" },
+  { via = "mise", ref = "npm:@openai/codex" },
+]
+
+[tool.gh]
+bin = "gh"
+description = "GitHub CLI"
+updates = "manager"
+install = [
+  { via = "pacman", name = "github-cli" },
+  { via = "brew", name = "gh" },
+  { via = "apt", name = "gh" },
+  { via = "dnf", name = "gh" },
+]
+
+[tool.fd]
+bin = "fd"
+description = "Fast file finder (remapped on Debian/Ubuntu/Fedora)"
+updates = "manager"
+install = [
+  { via = "apt", name = "fd-find", shim = "fdfind:fd" },
+  { via = "dnf", name = "fd-find" },
+  { via = "brew", name = "fd" },
+  { via = "pacman", name = "fd" },
+]
+
+[tool.bat]
+bin = "bat"
+description = "Cat clone with syntax highlighting (batcat shim on Debian/Ubuntu)"
+updates = "manager"
+install = [
+  { via = "apt", name = "bat", shim = "batcat:bat" },
+  { via = "dnf", name = "bat" },
+  { via = "brew", name = "bat" },
+  { via = "pacman", name = "bat" },
+]
+
+[tool.yq]
+bin = "yq"
+description = "YAML/TOML processor (mikefarah/yq)"
+updates = "manager"
+install = [
+  { via = "pacman", name = "go-yq" },
+  { via = "brew", name = "yq" },
+  { via = "mise", ref = "github:mikefarah/yq" },
+]
+
+[tool.eza]
+bin = "eza"
+description = "Modern ls replacement"
+updates = "manager"
+install = [
+  { via = "apt", name = "eza" },
+  { via = "brew", name = "eza" },
+  { via = "pacman", name = "eza" },
+  { via = "mise", ref = "github:eza-community/eza" },
+]
+
+[tool.starship]
+bin = "starship"
+description = "Cross-shell prompt"
+updates = "manager"
+install = [
+  { via = "brew", name = "starship" },
+  { via = "pacman", name = "starship" },
+  { via = "mise", ref = "github:starship/starship" },
+]
+
+[tool.neovim]
+bin = "nvim"
+description = "Hyperextensible Vim-based text editor"
+updates = "manager"
+install = [
+  { via = "brew", name = "neovim" },
+  { via = "pacman", name = "neovim" },
+  { via = "mise", ref = "github:neovim/neovim" },
+]
+
+[tool.atuin]
+bin = "atuin"
+description = "Unified cross-shell history with SQLite and sync"
+updates = "manager"
+install = [
+  { via = "brew", name = "atuin" },
+  { via = "pacman", name = "atuin" },
+  { via = "mise", ref = "github:atuinsh/atuin" },
+]
+
+[tool.gh-dash]
+bin = "gh-dash"
+description = "GitHub CLI dashboard extension"
+updates = "manager"
+install = [
+  { via = "gh-ext", name = "dlvhdr/gh-dash" },
+]

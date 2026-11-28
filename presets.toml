@@ -1,0 +1,104 @@
+# Composable machine presets. Additive `include` union + `exclude` filters.
+# Host-to-preset selection lives in local state (never committed).
+
+ws_min_version = "0.1.0"
+
+[preset.base]
+description = "Minimal shell and core CLI baseline across macOS and Linux"
+links = ["links/common.links"]
+packages = ["pkg/server.txt"]
+secrets = "none"
+tags = ["core", "cli"]
+
+[preset.dev-cli]
+description = "Full terminal development workstation stack"
+include = ["base"]
+packages = [
+  "pkg/server.txt",
+]
+extra_tools = [
+  "bat",
+  "claude-code",
+  "codex",
+  "eza",
+  "fd",
+  "fzf",
+  "gh",
+  "gh-dash",
+  "jq",
+  "lazydocker",
+  "lazygit",
+  "neovim",
+  "ripgrep",
+  "starship",
+  "tmux",
+  "yq",
+  "zoxide",
+]
+secrets = "1password"
+tags = ["core", "cli", "dev"]
+
+[preset.mac-workstation]
+description = "Full macOS workstation (Homebrew formulae and casks)"
+include = ["dev-cli"]
+when = { os = "darwin" }
+links = ["links/mac.links"]
+packages = ["pkg/mac-brew.txt", "pkg/mac-cask.txt"]
+exclude_packages = ["zsh"]
+os_hooks = ["os/mac/postinstall.sh", "os/mac/defaults.sh"]
+secrets = "1password"
+tags = ["core", "cli", "dev", "desktop", "gui", "mac"]
+
+[preset.arch-desktop]
+description = "Arch Linux workstation with Wayland compositors and btrfs snapshots"
+include = ["dev-cli"]
+when = { os = "linux", distro = ["arch", "cachyos"] }
+links = ["links/linux.links"]
+packages = ["pkg/arch.txt"]
+conflicts = ["pkg/arch-conflicts.txt"]
+os_hooks = [
+  "os/arch/postinstall.sh",
+  "os/arch/desktop/setup.sh",
+  "os/arch/snapshots.sh",
+]
+secrets = "1password"
+tags = ["core", "cli", "dev", "desktop", "gui", "arch"]
+
+[preset.cachyos-desktop]
+description = "CachyOS workstation profile extending arch-desktop"
+include = ["arch-desktop"]
+when = { os = "linux", distro = ["cachyos"] }
+secrets = "1password"
+tags = ["core", "cli", "dev", "desktop", "gui", "arch", "cachyos"]
+
+[preset.ubuntu-runner]
+description = "Headless Ubuntu CI worker / workflow runner (safe unattended mode)"
+include = ["base"]
+exclude = ["desktop", "gui"]
+when = { os = "linux", distro = ["ubuntu"], headless = true }
+links = ["links/server.links"]
+packages = ["pkg/server.txt"]
+extra_tools = ["yq", "eza", "starship", "neovim"]
+secrets = "none"
+tags = ["core", "cli", "headless", "runner"]
+
+[preset.debian-server]
+description = "Headless Debian / Ubuntu minimal server profile"
+include = ["base"]
+exclude = ["desktop", "gui"]
+when = { os = "linux", distro = ["debian", "ubuntu"], headless = true }
+links = ["links/server.links"]
+packages = ["pkg/server.txt"]
+extra_tools = ["yq", "eza", "starship"]
+secrets = "none"
+tags = ["core", "cli", "headless", "server"]
+
+[preset.server]
+description = "Headless Linux server profile (apt, dnf, or pacman)"
+include = ["base"]
+exclude = ["desktop", "gui"]
+when = { os = "linux", headless = true }
+links = ["links/server.links"]
+packages = ["pkg/server.txt"]
+secrets = "none"
+tags = ["core", "cli", "headless", "server"]

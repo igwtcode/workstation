@@ -1,232 +1,37 @@
 #!/usr/bin/env bash
 #MISE description="Update the OS package manager only: refresh, upgrade, clean up (brew on mac, paru+paccache on arch)"
-#USAGE flag "-a --all" help="Full scope: on mac also upgrade self-updating casks (brew upgrade --greedy)"
-#USAGE flag "-y --yes" help="Skip confirmations (package ops run with --noconfirm)"
-#USAGE flag "-n --dry-run" help="List the steps that would run without executing anything"
-#USAGE flag "-c --check" help="Only report what is outdated; change nothing"
 set -euo pipefail
 
-root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
-# shellcheck source=lib/common.sh
-source "$root/lib/common.sh"
-
-if [[ ${usage_yes:-false} == true ]]; then
-  export WS_YES=1
-fi
-if [[ ${usage_dry_run:-false} == true ]]; then
-  export WS_DRY_RUN=1
-fi
-all=${usage_all:-false}
-check=${usage_check:-false}
-
-summary=()
-
-# step <description> <cmd>... — announce, run (announce only in dry-run),
-# record for the end-of-run summary. Failure propagates to the caller.
-step() {
-  local desc=$1 rc=0
-  shift
-  if [[ ${WS_DRY_RUN:-0} == 1 ]]; then
-    log "[dry-run] $desc"
-    return 0
-  fi
-  styled 4 "==> $desc"
-  "$@" || rc=$?
-  [[ $rc -eq 0 ]] || return "$rc"
-  summary+=("$desc")
+ws=$(command -v ws || true)
+[[ -n $ws || ! -x $HOME/.local/bin/ws ]] || ws=$HOME/.local/bin/ws
+[[ -n $ws ]] || {
+  printf 'error: ws not installed — run: mise run ws:install\n' >&2
+  exit 1
 }
 
-# --- mac --------------------------------------------------------------------
-
-# restart_stale_tailscaled <restart-cmd...> — a package upgrade replaces the
-# binary but leaves the old daemon running
-restart_stale_tailscaled() {
-  ws_has tailscale || return 0
-  local json
-  json=$(tailscale version --daemon --json 2>/dev/null) || return 0
-  [[ $(jq -r .long <<<"$json") == "$(jq -r .daemonLong <<<"$json")" ]] && return 0
-  "$@"
-}
-
-# list_new <file> <installed-cmd...> — pkg-list entries not yet installed
-list_new() {
-  local file=$1
-  shift
-  comm -23 \
-    <(grep -vE '^[[:space:]]*(#|$)' "$file" | sort) \
-    <("$@" | sort)
-}
-
-# list_extra <file> <installed-cmd...> — installed but no longer in the list.
-# Report-only: nothing here uninstalls anything, removing a pkg-list entry
-# is always a manual `brew uninstall`/`paru -R` afterwards.
-list_extra() {
-  local file=$1
-  shift
-  comm -13 \
-    <(grep -vE '^[[:space:]]*(#|$)' "$file" | sort) \
-    <("$@" | sort)
-}
-
-check_mac() {
-  brew update
-  styled 4 "==> outdated formulae"
-  brew outdated --formula --verbose || true
-  styled 4 "==> outdated casks"
-  brew outdated --cask --verbose --greedy || true
-  local new extra
-  new=$(list_new "$root/pkg/mac-brew.txt" brew list --formula --full-name)
-  new+=$'\n'$(list_new "$root/pkg/mac-cask.txt" brew list --cask --full-name)
-  new=$(sed '/^$/d' <<<"$new")
-  [[ -n $new ]] && styled 4 "==> in pkg lists but not installed" && printf '%s\n' "$new"
-  # --installed-on-request excludes dependencies pulled in by other formulae,
-  # which would otherwise flood this with things nobody asked to remove
-  extra=$(list_extra "$root/pkg/mac-brew.txt" brew list --formula --installed-on-request --full-name)
-  extra+=$'\n'$(list_extra "$root/pkg/mac-cask.txt" brew list --cask --full-name)
-  extra=$(sed '/^$/d' <<<"$extra")
-  [[ -n $extra ]] && styled 4 "==> installed but not in pkg lists (remove manually if unwanted)" && printf '%s\n' "$extra"
-  return 0
-}
-
-# same tap-trust + idempotent-install pattern as os/mac/bootstrap.sh (kept in
-# sync by hand) — `brew install` is a no-op for anything already current, so
-# this only actually installs entries added to the list since the last run.
-trust_new_taps() {
-  local file=$1 kind=--formula pkg tap
-  [[ ${2:-} == --cask ]] && kind=--cask
-  while IFS= read -r pkg; do
-    tap=${pkg%/*}
-    brew tap "$tap"
-    brew trust "$kind" "$pkg" ||
-      warn "brew trust failed for '$pkg' — install will refuse it until trusted"
-  done < <(grep -E '^[^#[:space:]]+/[^/]+/[^/]+$' "$file" || true)
-}
-
-install_from_list() {
-  local file=$1 kind=formulae
-  shift
-  local -a pkgs=()
-  local pkg
-  while IFS= read -r pkg; do
-    pkgs+=("$pkg")
-  done < <(grep -vE '^[[:space:]]*(#|$)' "$file")
-  [[ $* == *--cask* ]] && kind=casks
-  log "packages: syncing ${#pkgs[@]} $kind from ${file##*/}"
-  brew install "$@" "${pkgs[@]}"
-}
-
-install_new_mac() {
-  trust_new_taps "$root/pkg/mac-brew.txt"
-  install_from_list "$root/pkg/mac-brew.txt"
-  trust_new_taps "$root/pkg/mac-cask.txt" --cask
-  install_from_list "$root/pkg/mac-cask.txt" --cask
-}
-
-update_mac() {
-  # Homebrew 6 asks for confirmation before an upgrade that touches anything
-  # beyond the named args — which a bare `brew upgrade` always does. --yes is
-  # the mac counterpart of arch's --noconfirm; without it the plan is shown
-  # and confirmed, which is the point of running this interactively.
-  [[ ${WS_YES:-0} == 1 ]] && export HOMEBREW_NO_ASK=1
-  step "brew: refresh package metadata" brew update
-  step "brew: install new entries from pkg lists" install_new_mac
-  local args=(upgrade) desc="brew: upgrade formulae + casks"
-  if [[ $all == true ]]; then
-    args+=(--greedy)
-    desc+=" (greedy — includes self-updating casks)"
-  fi
-  step "$desc" brew "${args[@]}"
-  step "tailscale: restart daemon if older than the CLI" \
-    restart_stale_tailscaled sudo "$(command -v brew)" services restart tailscale
-  # autoremove first: dropping unused deps makes cleanup's work smaller
-  step "brew: remove no-longer-needed dependencies" brew autoremove
-  step "brew: clean stale downloads and old versions" brew cleanup --prune=all
-}
-
-# --- arch -------------------------------------------------------------------
-
-check_arch() {
-  # -Sy then -Qu is the safe read-only path: refresh the db, list upgrades,
-  # never install (a bare -Sy followed by a partial install is the footgun,
-  # and nothing here installs)
-  sudo pacman -Sy
-  styled 4 "==> outdated packages"
-  paru -Qu || true
-  local new extra
-  new=$(list_new "$root/pkg/arch.txt" paru -Qq)
-  [[ -n $new ]] && styled 4 "==> in pkg/arch.txt but not installed" && printf '%s\n' "$new"
-  # -Qeq: explicitly installed, excludes dependencies pulled in by other
-  # packages — otherwise this would flood with things nobody asked to remove
-  extra=$(list_extra "$root/pkg/arch.txt" paru -Qeq)
-  [[ -n $extra ]] && styled 4 "==> installed but not in pkg/arch.txt (remove manually if unwanted)" && printf '%s\n' "$extra"
-  return 0
-}
-
-install_new_arch() {
-  local pkgs=(-S --needed)
-  [[ ${WS_YES:-0} == 1 ]] && pkgs+=(--noconfirm)
-  mapfile -t -O "${#pkgs[@]}" pkgs < <(grep -vE '^[[:space:]]*(#|$)' "$root/pkg/arch.txt")
-  paru "${pkgs[@]}"
-}
-
-update_arch() {
-  local args=(-Syu)
-  [[ ${WS_YES:-0} == 1 ]] && args+=(--noconfirm)
-  if [[ -e /var/lib/pacman/db.lck ]]; then
-    warn "pacman is locked (running elsewhere?) — skipping partial download cleanup"
-  else
-    step "pacman cache: clear partial downloads" sudo find /var/cache/pacman/pkg -maxdepth 1 -name 'download-*' -exec rm -rf {} +
-  fi
-  step "packages: remove ones pkg/arch.txt replaces" "$root/os/arch/conflicts.sh"
-  step "paru: install new entries from pkg/arch.txt" install_new_arch
-  step "paru: full system upgrade (repo + AUR)" paru "${args[@]}"
-  step "tailscale: restart daemon if older than the CLI" \
-    restart_stale_tailscaled sudo systemctl restart tailscaled.service
-  if ws_has paccache; then
-    step "paccache: keep 2 recent versions of installed packages" sudo paccache -rk2
-    step "paccache: drop cached versions of uninstalled packages" sudo paccache -ruk0
-  else
-    warn "paccache not found (pacman-contrib) — skipping cache pruning"
-  fi
-  # orphans (installed as deps, nothing needs them any more): report only —
-  # removing packages is never automatic
-  local orphans
-  orphans=$(paru -Qdtq 2>/dev/null | tr '\n' ' ' || true)
-  [[ -n ${orphans// /} ]] &&
-    warn "orphans, review before removing with 'paru -Rns \$(paru -Qdtq)': ${orphans% }"
-  return 0
-}
-
-# --- main --------------------------------------------------------------------
-
-profile=$(resolve_profile)
-
-if [[ $check == true ]]; then
-  case $profile in
-    mac) require_cmd brew && check_mac ;;
-    arch) require_cmd paru && check_arch ;;
-    server) die "server profile: no managed package step" ;;
+args=(--pkg-only)
+while (($#)); do
+  case $1 in
+    -a)
+      args+=(--all)
+      shift
+      ;;
+    -c | --check)
+      args+=(--digest)
+      shift
+      ;;
+    -y | --yes)
+      args+=(--allow all --non-interactive)
+      shift
+      ;;
+    --)
+      args+=("$@")
+      break
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
   esac
-  exit 0
-fi
-
-log "pkg: profile $profile${WS_DRY_RUN:+ (dry-run)}"
-
-case $profile in
-  mac)
-    require_cmd brew
-    update_mac
-    ;;
-  arch)
-    require_cmd paru
-    update_arch
-    ;;
-  server) die "server profile: no managed package step — use the distro's own package manager" ;;
-esac
-
-if [[ ${WS_DRY_RUN:-0} == 1 ]]; then
-  log "dry-run: nothing was executed"
-else
-  styled 2 "pkg: done — ${#summary[@]} steps:"
-  printf '  • %s\n' "${summary[@]}"
-fi
+done
+exec "$ws" update "${args[@]}"

@@ -2,6 +2,7 @@
 # CLAUDE.md § Settled decisions). Tasks live in .mise/tasks/.
 
 [tools]
+go = "1.27.4"
 shellcheck = "0"
 shfmt = "3"
 usage = "4"

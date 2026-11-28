@@ -1,8 +1,9 @@
 # Themes — palette schema and authoring rules
 
-Static color palettes for the terminal-scope theme system. `mise run theme`
-renders every template listed in [`registry`](registry) against one palette
-and runs the template's post-hook. See `CLAUDE.md` § Architecture.
+Static color palettes for the terminal-scope theme system. `ws theme` / `ws apply`
+(or the `mise run theme` shim) render every template listed in
+[`registry`](registry) against one palette and run the template's post-hook. See
+`CLAUDE.md` § Architecture.
 
 ## Layout
 
@@ -24,8 +25,8 @@ Color values are lowercase `#rrggbb`.
 
 Every palette must define **all** of these keys; every template may use
 **only** these (plus the derived `_strip` forms). Adding a token to a
-template means adding it to `WS_THEME_TOKENS` in `lib/theme.sh` and to
-every palette file in the same change.
+template means adding it to `RequiredThemeTokens` in
+`ws/internal/config/themes.go` and every palette file in the same change.
 
 | Token | Meaning |
 | --- | --- |

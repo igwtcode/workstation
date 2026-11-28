@@ -1,23 +1,15 @@
 #!/usr/bin/env bash
-#MISE description="Lint and format-check all shell scripts (shellcheck + shfmt)"
+#MISE description="Lint, format-check, and reject comments in all shell scripts (shellcheck + shfmt)"
 set -euo pipefail
 
 cd "${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}"
 
-# .gitignore is respected on purpose: it keeps rendered theme outputs
-# (config/*/colors.sh) and vendored third-party code (tmux's plugins/, which
-# `mise run sync` clones into the linked config dir) out of the lint set.
-# The private task group is gitignored too but is ours, so the explicit
-# .mise/tasks walk below picks it up regardless.
 mapfile -t scripts < <(
   {
     fd --hidden --type f --extension sh \
       --exclude .git --exclude node_modules . 2>/dev/null ||
       find . -path ./.git -prune -o -type f -name '*.sh' -print
-    # extensionless executables: file tasks and bin helpers
-    for d in .mise/tasks bin; do
-      [[ -d $d ]] && find "$d" -type f ! -name '*.md'
-    done
+    [[ -d .mise/tasks ]] && find .mise/tasks -type f ! -name '*.md'
   } | sort -u
 )
 
@@ -30,7 +22,55 @@ status=0
 shellcheck --severity=style "${scripts[@]}" || status=1
 shfmt -d -i 2 -ci "${scripts[@]}" || status=1
 
+check_comments() {
+  local lang=$1 f=$2 ast hits
+  if ! ast=$(shfmt -ln "$lang" --to-json <"$f"); then
+    printf 'comment-check: failed to parse %s (%s)\n' "$f" "$lang" >&2
+    status=1
+    return
+  fi
+  hits=$(jq -r --arg f "$f" '
+    [.. | objects | select(has("Text") and has("Hash"))]
+    | map(select(
+        ((.Hash.Line == 1 and .Hash.Col == 1 and (.Text | startswith("!"))) or
+         (.Hash.Col == 1 and (.Text | test("^(MISE|USAGE)( |$)"))) or
+         (.Text | test("^ ?shellcheck [^#]+$"))) | not
+      ))
+    | .[] | "\($f):\(.Hash.Line): disallowed comment: #\(.Text)"
+  ' <<<"$ast")
+  if [[ -n $hits ]]; then
+    printf '%s\n' "$hits" >&2
+    status=1
+  fi
+}
+
+comment_count=0
+for f in "${scripts[@]}"; do
+  [[ $f == */colors-template.* ]] && continue
+  check_comments bash "$f"
+  comment_count=$((comment_count + 1))
+done
+
+if [[ -d config/bash ]]; then
+  while IFS= read -r f; do
+    [[ -f $f && $f != */colors-template.* && $f != */colors.sh ]] || continue
+    check_comments bash "$f"
+    comment_count=$((comment_count + 1))
+  done < <({ fd --hidden --type f . config/bash 2>/dev/null || find config/bash -type f; } | sort -u)
+fi
+
+if [[ -d config/zsh ]]; then
+  while IFS= read -r f; do
+    [[ -f $f && $f != */colors-template.* && $f != */colors.sh ]] || continue
+    check_comments zsh "$f"
+    if command -v zsh >/dev/null 2>&1; then
+      zsh -n "$f" || status=1
+    fi
+    comment_count=$((comment_count + 1))
+  done < <({ fd --hidden --type f . config/zsh 2>/dev/null || find config/zsh -type f; } | sort -u)
+fi
+
 if [[ $status -eq 0 ]]; then
-  echo "OK: ${#scripts[@]} scripts clean"
+  echo "OK: ${#scripts[@]} scripts linted, $comment_count shell files comment-clean"
 fi
 exit "$status"

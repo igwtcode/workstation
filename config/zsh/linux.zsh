@@ -1,25 +1,22 @@
 #!/usr/bin/env zsh
-# Linux layer — sourced by zshrc before core.zsh.
 
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 
-# Android SDK (Expo/React Native), installed by `mise run android`
 export ANDROID_HOME=$HOME/Android/Sdk
 export PATH=$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
 [[ -d /usr/lib/jvm/java-17-openjdk ]] && export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 
-# devpod-bin ships the CLI as devpod-cli; mac's cask calls it devpod
 (( $+commands[devpod-cli] )) && alias devpod=devpod-cli
 
-# clipboard helper used by core aliases (wayland)
 clipcopy() { wl-copy "$@" }
 
-# clipboard history picker (cliphist + wayland)
 alias ch="cliphist list | fzf --no-sort -d $'\t' --with-nth 2 | cliphist decode | wl-copy"
 
-# --- paru pickers (arch only) ----------------------------------------------
-
-if command -v paru &>/dev/null; then
+if (( $+commands[ws] )); then
+  pinstall() { command ws pkg search --tui "$@" }
+  premove() { command ws pkg remove "$@" }
+  pinfo() { command ws pkg info "$@" }
+elif command -v paru &>/dev/null; then
   pinstall() {
     paru -Slq | fzf \
       --preview "paru -Si {}" \

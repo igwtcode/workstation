@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# Bound to bare ctrl+h/j/k/l in config-template.toml. Forwards the keystroke
-# into the focused pane when it's running vim/nvim (so nvim's own splits
-# handle it), otherwise moves focus between herdr panes directly.
 set -euo pipefail
 
 direction=$1

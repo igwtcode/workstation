@@ -1,91 +1,29 @@
 #!/usr/bin/env bash
 #MISE description="Restore or back up the .env files of a code tree via a 1Password document (zip)"
-#USAGE arg "[mode]" help="load (restore) or save (back up); omit for a picker"
-#USAGE arg "[dir]" help="Tree to scan / restore into (default: WS_CODE_ROOT — the active zone's code root)"
-#USAGE flag "-d --doc <title>" help="1Password document title (default: workstation-envfiles.zip)"
-#USAGE flag "-y --yes" help="Skip confirmations"
 set -euo pipefail
 
-root=${MISE_PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
-# shellcheck source=lib/common.sh
-source "$root/lib/common.sh"
-# shellcheck source=lib/op.sh
-source "$root/lib/op.sh"
-# shellcheck source=lib/zone.sh
-source "$root/lib/zone.sh"
+ws=$(command -v ws || true)
+[[ -n $ws || ! -x $HOME/.local/bin/ws ]] || ws=$HOME/.local/bin/ws
+[[ -n $ws ]] || {
+  printf 'error: ws not installed — run: mise run ws:install\n' >&2
+  exit 1
+}
 
-[[ ${usage_yes:-false} == true ]] && export WS_YES=1
-
-# The tree to work on. Archive entries are stored RELATIVE TO THIS DIRECTORY,
-# not to $HOME — so a tree saved from one layout restores into another
-# (`save ~/old/tree` then `load ~/work/code`). That is what makes this usable
-# across a machine migration, where the repos land somewhere new.
-tree=${usage_dir:-${WS_CODE_ROOT:-}}
-[[ -n $tree ]] ||
-  die "no directory given and WS_CODE_ROOT is unset — pass a path, or run from inside an identity zone"
-tree=${tree/#\~/$HOME}
-tree=${tree%/}
-[[ $tree == /* ]] || die "directory must be an absolute path (got '$tree')"
-
-# Each zone's tree has its own env files, so each gets its own document.
-# The zone comes from the tree, not the ambient one: a --dir pointing at
-# another zone's tree must not read or overwrite this zone's document.
-zone=${WS_ZONE:-}
-if [[ -n ${WS_ZONES:-} ]]; then
-  while IFS= read -r zname; do
-    zroot=$(zone_root "$zname")
-    [[ $tree == "$zroot" || $tree == "$zroot"/* ]] && {
-      zone=$zname
+args=(--execute)
+while (($#)); do
+  case $1 in
+    -y | --yes)
+      args+=(--non-interactive)
+      shift
+      ;;
+    --)
+      args+=("$@")
       break
-    }
-  done < <(zone_names)
-fi
-doc_title=${usage_doc:-${WS_OP_ENVFILES_DOC:-workstation-envfiles${zone:+-$zone}.zip}}
-
-mode=${usage_mode:-}
-[[ -n $mode ]] || mode=$(printf 'load\nsave\n' | pick "op:envfiles>")
-
-tmp=$(mktemp -d)
-trap 'rm -rf "$tmp"' EXIT
-
-case $mode in
-  save)
-    require_cmd fd zip
-    [[ -d $tree ]] || die "no such directory: $tree"
-    # `-printf`-style relative output: fd's --base-directory makes every hit
-    # relative to the tree, which is exactly what the archive should hold.
-    fd --hidden --no-ignore --type f '^\.env($|\.)' \
-      --base-directory "$tree" --exclude node_modules | sort >"$tmp/files"
-    [[ -s $tmp/files ]] || die "no .env files found under ${tree/#$HOME/\~}"
-    log "found $(wc -l <"$tmp/files" | tr -d ' ') env files under ${tree/#$HOME/\~}"
-    confirm "Back them up to 1Password document '$doc_title'?"
-    op_ensure
-    # -@ reads the file list from stdin, relative to the current directory
-    (cd "$tree" && zip -q "$tmp/envfiles.zip" -@ <"$tmp/files")
-    op_doc_put "$doc_title" "$tmp/envfiles.zip"
-    log "backed up env files → 1Password document '$doc_title'"
-    ;;
-  load)
-    require_cmd unzip
-    op_ensure
-    if [[ -z $(op_doc_id "$doc_title") ]]; then
-      warn "no 1Password document '$doc_title' — env-file documents in scope:"
-      op_doc_list | grep -i envfiles >&2 || true
-      die "back this tree up first ('mise run op:envfiles save'), or pass --doc <title>"
-    fi
-    op_doc_get "$doc_title" "$tmp/envfiles.zip"
-    # Entries are relative to whatever tree was saved. An archive rooted one
-    # level off still extracts cleanly, just into the wrong places — so show
-    # the resulting paths and confirm against those, not against the title.
-    unzip -Z1 "$tmp/envfiles.zip" | grep -v '/$' >"$tmp/entries" || true
-    [[ -s $tmp/entries ]] || die "'$doc_title' contains no files"
-    log "'$doc_title' holds $(wc -l <"$tmp/entries" | tr -d ' ') files; they will land as:"
-    sed "s|^|  ${tree/#$HOME/\~}/|" "$tmp/entries" | head -5
-    [[ $(wc -l <"$tmp/entries") -gt 5 ]] && log "  ... and $(($(wc -l <"$tmp/entries") - 5)) more"
-    confirm "Restore into ${tree/#$HOME/\~}? (existing files are overwritten)"
-    mkdir -p "$tree"
-    unzip -qo "$tmp/envfiles.zip" -d "$tree"
-    log "restored env files from '$doc_title' into ${tree/#$HOME/\~}"
-    ;;
-  *) die "unknown mode '$mode' (expected load|save)" ;;
-esac
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+exec "$ws" vault envfiles "${args[@]}"

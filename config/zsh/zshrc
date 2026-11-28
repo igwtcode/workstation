@@ -1,18 +1,15 @@
 #!/usr/bin/env zsh
-# Thin entry — ~/.zshrc symlinks here (links/common.links). The shared core
-# and per-OS layers live next to this file's real location in the repo, so
-# resolving the symlink finds them without any hardcoded repo path.
 
 _ws_zdir=${${:-$HOME/.zshrc}:A:h}
+if [[ -z ${WS_DIR:-} && -f ${_ws_zdir:h:h}/themes/registry ]]; then
+  export WS_DIR=${_ws_zdir:h:h}
+fi
 
 zmodload -F zsh/stat b:zstat
 
-# _ws_cached <cmd> [args...] — source cmd's generated init script from a cache
-# keyed on the binary's resolved path and mtime, regenerated on upgrade
 _ws_cached() {
   local bin=$1 d out line
   local -a mt
-  # a mise shim resolves to mise itself, which would key the cache wrongly
   if [[ $bin != /* ]]; then
     bin=
     for d in $path; do
@@ -39,8 +36,6 @@ _ws_cached() {
   source $out
 }
 
-# OS layer first: it prepares PATH/env (brew shellenv, gnubin, clipboard
-# helper) that the core's tool inits depend on.
 case "$OSTYPE" in
   darwin*) source "$_ws_zdir/mac.zsh" ;;
   linux*) source "$_ws_zdir/linux.zsh" ;;
@@ -49,5 +44,4 @@ esac
 source "$_ws_zdir/core.zsh"
 unset _ws_zdir
 
-# Machine-local, uncommitted extras
 [[ -f ~/.customrc.sh ]] && source ~/.customrc.sh
