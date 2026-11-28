@@ -56,7 +56,7 @@ func (m Model) buildHelpGroups() []helpGroup {
 				{"<a>", "Row actions menu"},
 				{"<r>", "Refresh active view"},
 				{"<y / Y>", "Copy primary / secondary"},
-				{"<e>", "Edit in $VISUAL/$EDITOR"},
+				{"<e>", "Edit in $EDITOR ($VISUAL first for repos)"},
 				{"<o>", "Open external / browser"},
 				{"<d>", "Diff"},
 				{"<i>", "Install"},

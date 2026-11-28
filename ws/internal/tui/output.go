@@ -286,7 +286,6 @@ func (p outputPanel) KeyHints(SplitMode, bool) [][2]string {
 		{"j/k/C-d", "Scroll output"},
 		{"[/]", "Prev / Next run"},
 		{"y/Y", "Copy output/CLI"},
-		{"C", "Borderless copy"},
 		{"w", "Toggle wrap"},
 	}
 	if p.HasRunningStream() || p.MutationInFlight() {

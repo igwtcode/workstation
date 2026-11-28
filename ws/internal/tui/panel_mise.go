@@ -219,7 +219,7 @@ func (p misePanel) KeyHints(split SplitMode, focusPreview bool) [][2]string {
 
 func (p misePanel) RowActions(split SplitMode, focusPreview bool) []RowAction {
 	return []RowAction{
-		{Key: "e", Label: "Edit mise config", Description: "Open selected mise config in $VISUAL/$EDITOR"},
+		{Key: "e", Label: "Edit mise config", Description: "Open selected mise config in $EDITOR"},
 		{Key: "u", Label: "Upgrade outdated", Description: "Upgrade selected or outdated mise tools"},
 		{Key: "y", Label: "Copy config path", Description: "Copy mise config file path"},
 		{Key: "r", Label: "Refresh mise", Description: "Rescan mise configs and outdated versions"},

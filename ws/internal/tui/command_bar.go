@@ -168,7 +168,7 @@ func defaultCommandSpecs() []commandSpec {
 		{Name: "clear", Kind: "context", Usage: ":clear", Description: "Clear active filter and selection"},
 		{Name: "reload", Kind: "action", Usage: ":reload", Description: "Reload ~/.ws/config.toml, mise.local.toml & theme now"},
 		{Name: "scan", Kind: "action", Usage: ":scan [env|repos|all]", Description: "Rescan indexed env files & repos"},
-		{Name: "update", Aliases: []string{"upgrade-all"}, Kind: "action", Usage: ":update [all|pkg]", Description: "Run parallel workstation update across packages, tools & dotfiles", Dangerous: true},
+		{Name: "update", Aliases: []string{"upgrade-all"}, Kind: "action", Usage: ":update [all]", Description: "Run parallel workstation update across packages, tools & dotfiles", Dangerous: true},
 		{Name: "status", Kind: "action", Usage: ":status", Description: "Run workstation diagnostics into Output"},
 		{Name: "backup", Kind: "action", Usage: ":backup", Description: "Encrypt & back up ws.db into Output"},
 		{Name: "pull", Kind: "action", Usage: ":pull [all]", Description: "Pull selected or all repos into Output", Dangerous: true},
